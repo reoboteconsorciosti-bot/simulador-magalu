@@ -3,7 +3,7 @@
 # Stage 1: Base
 FROM node:20-alpine AS base
 WORKDIR /app
-RUN corepack enable && corepack prepare pnpm@latest --activate
+RUN corepack enable && corepack prepare pnpm@9 --activate
 
 # Stage 2: Install dependencies
 FROM base AS deps
