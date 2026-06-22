@@ -1,0 +1,126 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@custom-variant dark (&:is(.dark *));
+
+/* Tema padrão (claro moderno) - Identidade Visual Reobote Consórcios */
+:root {
+  --background: #F5F7FA;
+  --foreground: #111827;
+  --card: #FFFFFF;
+  --card-foreground: #111827;
+  --popover: #FFFFFF;
+  --popover-foreground: #111827;
+  --primary: #0EA5E9;
+  --primary-foreground: #FFFFFF;
+  --secondary: #F3F4F6;
+  --secondary-foreground: #374151;
+  --muted: #F9FAFB;
+  --muted-foreground: #6B7280;
+  --accent: #EFF6FF;
+  --accent-foreground: #0284C7;
+  --destructive: #EF4444;
+  --destructive-foreground: #FFFFFF;
+  --border: #E5E7EB;
+  --input: #FFFFFF;
+  --ring: #0EA5E9;
+  --chart-1: #0EA5E9;
+  --chart-2: #0284C7;
+  --chart-3: #0369A1;
+  --chart-4: #0C4A6E;
+  --chart-5: #075985;
+  --radius: 0.5rem;
+  --sidebar: #FFFFFF;
+  --sidebar-foreground: #374151;
+  --sidebar-primary: #E0F2FE;
+  --sidebar-primary-foreground: #0284C7;
+  --sidebar-accent: #F9FAFB;
+  --sidebar-accent-foreground: #111827;
+  --sidebar-border: #E5E7EB;
+  --sidebar-ring: #0EA5E9;
+}
+
+/* Tema escuro */
+.dark {
+  --background: #0F172A;
+  --foreground: #F8FAFC;
+  --card: #1E293B;
+  --card-foreground: #F8FAFC;
+  --popover: #1E293B;
+  --popover-foreground: #F8FAFC;
+  --primary: #0EA5E9;
+  --primary-foreground: #0F172A;
+  --secondary: #334155;
+  --secondary-foreground: #F8FAFC;
+  --muted: #1E293B;
+  --muted-foreground: #94A3B8;
+  --accent: #334155;
+  --accent-foreground: #F8FAFC;
+  --destructive: #EF4444;
+  --destructive-foreground: #F8FAFC;
+  --border: #334155;
+  --input: #1E293B;
+  --ring: #0EA5E9;
+  --sidebar: #1E293B;
+  --sidebar-foreground: #F8FAFC;
+  --sidebar-primary: #0EA5E9;
+  --sidebar-primary-foreground: #0F172A;
+  --sidebar-accent: #334155;
+  --sidebar-accent-foreground: #F8FAFC;
+  --sidebar-border: #334155;
+  --sidebar-ring: #0EA5E9;
+}
+
+@theme inline {
+  --font-sans: var(--font-lato), 'Lato', system-ui, sans-serif;
+  --font-serif: var(--font-playfair), 'Playfair Display', Georgia, serif;
+  --font-mono: 'Geist Mono', 'Geist Mono Fallback';
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground font-sans;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-serif;
+  }
+}
