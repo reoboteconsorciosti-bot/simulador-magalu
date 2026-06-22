@@ -20,6 +20,10 @@ const lato = Lato({
 export const metadata: Metadata = {
   title: 'Reobote Consórcios - Simulador Magalu',
   description: 'Sistema de simulação e propostas para Magalu Consórcio',
+  icons: {
+    icon: '/favicon/reobote_favicon_v4.png',
+    apple: '/apple-icon.png',
+  },
 }
 
 export default function RootLayout({
