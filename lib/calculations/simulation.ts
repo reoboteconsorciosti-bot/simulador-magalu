@@ -24,6 +24,23 @@ export function calcularParcelaInicial(
   return parcelaInicial 
 }
 
+export function aplicarReajusteAnual(
+  valorBase: number,
+  mesContemplacao: number,
+  inccAnual: number
+): number {
+  let valor = valorBase
+  const maxMeses = Math.min(mesContemplacao, 1000)
+
+  for (let mes = 1; mes <= maxMeses; mes++) {
+    if (mes % 12 === 0) {
+      valor = valor * (1 + inccAnual)
+    }
+  }
+
+  return valor
+}
+
 export function calcularComponentesMeiaParcela(
   credito: number,
   prazo: number,
@@ -71,12 +88,34 @@ export function calcularPosContemplacao(
   credito: number,
   prazo: number,
   taxaTotal: number,
-  mesContemplacao: number
+  mesContemplacao: number,
+  inccAnual: number
 ): number {
-  const ajusteAmortizacao = calcularAjusteAmortizacao(credito, prazo, mesContemplacao)
-  const parcelaBase = calcularParcelaBasePosContemplacao(credito, prazo, taxaTotal)
-  
-  return ajusteAmortizacao + parcelaBase
+  const incc = inccAnual / 100
+
+  const fundoComumBase = (credito / 2) / prazo
+  const taxaMensal = (credito * (taxaTotal / 100)) / prazo
+  const parcelaInicialBase = fundoComumBase + taxaMensal
+  const parcelaReajustada = aplicarReajusteAnual(
+    parcelaInicialBase,
+    mesContemplacao,
+    incc
+  )
+
+  const prazoRestante = prazo - mesContemplacao
+  if (prazoRestante <= 0) {
+    return parcelaReajustada
+  }
+
+  const metadeCredito = credito / 2
+  const metadeCreditoReajustada = aplicarReajusteAnual(
+    metadeCredito,
+    mesContemplacao,
+    incc
+  )
+  const calculoB = metadeCreditoReajustada / prazoRestante
+
+  return calculoB + parcelaReajustada
 }
 
 // Calcula pagamentos mensais com reajuste INCC anual para um período dado
@@ -238,17 +277,13 @@ export function calculateSimulation(input: SimulationInput): SimulationResult {
       mesContemplacaoUsado
     )
 
-  // Step 6: Parcela integral nasce do fundo comum reajustado até a contemplação
-  // somado à taxa reajustada até a contemplação e ao ajuste de amortização
-  const ajusteAmortizacaoReajustado = calcularAjusteAmortizacaoReajustado(
-    totalInvestidoFundoComum,
+  const finalPaymentAfterContemplation = calcularPosContemplacao(
+    creditValue,
     months,
-    mesContemplacaoUsado
+    taxaTotal,
+    mesContemplacaoUsado,
+    incc
   )
-  // Parcela base pós contemplação usa os valores do último mês pré contemplação
-  const fundoComumIntegral = ultimoFundoComumPago * 2
-  const parcelaBase = fundoComumIntegral + ultimaTaxaAdministracaoPaga
-  const finalPaymentAfterContemplation = parcelaBase + ajusteAmortizacaoReajustado
 
   // Step 7: Pós-contemplação aplica reajuste anual sobre a parcela integral
   const {
