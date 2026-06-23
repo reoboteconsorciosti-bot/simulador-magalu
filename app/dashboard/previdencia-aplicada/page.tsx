@@ -21,9 +21,8 @@ export default function PrevidenciaAplicadaPage() {
   
   const [modality, setModality] = useState<string>('Lance Fixo')
   const [application, setApplication] = useState<number | undefined>(0.9)
-  const [currentMonthState, setCurrentMonthState] = useState<number | undefined>(undefined)
 
-  const currentMonth = currentMonthState ?? contemplationMonth ?? undefined
+  const currentMonth = contemplationMonth
 
   // Calcula os resultados da simulação principal para pegar finalPaymentAfterContemplation
   const simulationResults = useMemo(() => {
@@ -141,7 +140,7 @@ export default function PrevidenciaAplicadaPage() {
               <label className="text-xs font-bold text-muted-foreground">Mês Contemplação</label>
               <NumericFormat
                 value={currentMonth}
-                onValueChange={(values) => setCurrentMonthState(values.floatValue ?? undefined)}
+                onValueChange={(values) => setSharedField('contemplationMonth', values.floatValue ?? null)}
                 allowNegative={false}
                 decimalScale={0}
                 min={1}

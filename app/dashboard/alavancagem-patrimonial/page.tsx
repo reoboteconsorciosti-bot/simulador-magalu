@@ -212,20 +212,20 @@ export default function AlavancagemPatrimonialPage() {
                 <div>
                   <span className="text-[10px] font-black text-primary uppercase tracking-widest bg-primary/10 px-2.5 py-1 rounded-full">Passo 01: Liberação</span>
                 </div>
-                <div className="space-y-4">
-                  <div className="bg-card rounded-xl p-4 border border-primary/10 shadow-sm">
+                <div className="flex flex-wrap gap-4">
+                  <div className="bg-card rounded-xl p-4 border border-primary/10 shadow-sm flex-1 min-w-[180px]">
                     <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block mb-1">Crédito Contemplado</span>
                     <span className="text-2xl xl:text-3xl font-black text-primary tracking-tight break-all">
                       {formatCurrency(creditoPatrimonial ?? results?.creditContemplado ?? 0)}
                     </span>
                   </div>
-                  <div className="bg-card rounded-xl p-4 border border-primary/10 shadow-sm">
+                  <div className="bg-card rounded-xl p-4 border border-primary/10 shadow-sm flex-1 min-w-[180px]">
                     <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block mb-1">Prazo Restante</span>
                     <span className="text-2xl xl:text-3xl font-black text-foreground tracking-tight">
                       {(months && contemplationMonth ? Math.max(0, months - contemplationMonth) : 0)} Meses
                     </span>
                   </div>
-                  <div className="bg-card rounded-xl p-4 border border-primary/10 shadow-sm">
+                  <div className="bg-card rounded-xl p-4 border border-primary/10 shadow-sm flex-1 min-w-[180px]">
                     <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block mb-1">Total Pago Consórcio</span>
                     <span className="text-2xl xl:text-3xl font-black text-foreground tracking-tight break-all">
                       {formatCurrency(results?.totalPagoConsorcio ?? 0)}
