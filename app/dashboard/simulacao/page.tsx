@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { DrawingCanvas } from '@/components/drawing-canvas'
 import { toast } from 'sonner'
 import { Save, FileDown, RotateCcw, CreditCard, BarChart3, Calendar, CheckCircle, Wallet } from 'lucide-react'
 import { generateSimulationPDF } from '@/lib/pdf'
@@ -214,10 +215,15 @@ export default function SimulacaoPage() {
         {/* Input Form */}
         <Card>
           <CardHeader>
-            <CardTitle>Dados da Simulação</CardTitle>
-            <CardDescription>
-              Preencha os dados para calcular a proposta
-            </CardDescription>
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <CardTitle>Dados da Simulação</CardTitle>
+                <CardDescription>
+                  Preencha os dados para calcular a proposta
+                </CardDescription>
+              </div>
+              <DrawingCanvas />
+            </div>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
