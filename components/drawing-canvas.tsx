@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { usePathname } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 
 type DrawPoint = {
@@ -9,16 +10,51 @@ type DrawPoint = {
   isStart: boolean
 }
 
+// Usamos localStorage para persistir os desenhos por rota
+const STORAGE_KEY = 'drawing-canvas-by-page'
+
+const getSavedDrawings = (): Record<string, DrawPoint[]> => {
+  if (typeof window === 'undefined') return {}
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY)
+    return saved ? JSON.parse(saved) : {}
+  } catch {
+    return {}
+  }
+}
+
+const saveDrawing = (pathname: string, points: DrawPoint[]) => {
+  const drawings = getSavedDrawings()
+  drawings[pathname] = points
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(drawings))
+}
+
 export function DrawingCanvas() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const isDrawingRef = useRef(false)
   const [isOpen, setIsOpen] = useState(false)
   const [isClient, setIsClient] = useState(false)
+  const pathname = usePathname()
   const [drawPoints, setDrawPoints] = useState<DrawPoint[]>([])
 
   useEffect(() => {
     setIsClient(true)
   }, [])
+
+  useEffect(() => {
+    // Quando muda de rota, carregar o desenho da nova rota
+    if (isClient) {
+      const drawings = getSavedDrawings()
+      setDrawPoints(drawings[pathname] || [])
+    }
+  }, [pathname, isClient])
+
+  useEffect(() => {
+    // Salvar o desenho atual quando os pontos mudarem
+    if (isClient) {
+      saveDrawing(pathname, drawPoints)
+    }
+  }, [drawPoints, pathname, isClient])
 
   useEffect(() => {
     if (!isOpen || !isClient) return
@@ -41,10 +77,13 @@ export function DrawingCanvas() {
       context.lineJoin = 'round'
       context.lineWidth = 3
       context.strokeStyle = '#ef4444'
+      
+      // Redesenhar o desenho da página atual
+      redrawCanvas()
     }
 
     initCanvas()
-  }, [isOpen, isClient])
+  }, [isOpen, isClient, drawPoints, pathname])
 
   useEffect(() => {
     if (!isOpen || !isClient) return
