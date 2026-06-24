@@ -104,20 +104,16 @@ export function DrawingCanvas() {
     const currentScrollX = window.scrollX
     const currentScrollY = window.scrollY
     
-    // Calcula a posição fixa na página
-    const fixedX = x + currentScrollX
-    const fixedY = y + currentScrollY
-    
     const point: DrawPoint = {
-      x: fixedX,
-      y: fixedY,
+      x: x,
+      y: y,
       isStart: true
     }
     setDrawPoints(prev => [...prev, point])
     
     // Desenha na posição visível atual
     context.beginPath()
-    context.moveTo(x, y)
+    context.moveTo(x - currentScrollX, y - currentScrollY)
   }
 
   const draw = (x: number, y: number) => {
@@ -129,19 +125,15 @@ export function DrawingCanvas() {
     const currentScrollX = window.scrollX
     const currentScrollY = window.scrollY
     
-    // Calcula a posição fixa na página
-    const fixedX = x + currentScrollX
-    const fixedY = y + currentScrollY
-    
     const point: DrawPoint = {
-      x: fixedX,
-      y: fixedY,
+      x: x,
+      y: y,
       isStart: false
     }
     setDrawPoints(prev => [...prev, point])
     
     // Desenha na posição visível atual
-    context.lineTo(x, y)
+    context.lineTo(x - currentScrollX, y - currentScrollY)
     context.stroke()
   }
 
@@ -182,8 +174,8 @@ export function DrawingCanvas() {
           <canvas
             ref={canvasRef}
             className="fixed inset-0 block h-screen w-screen cursor-crosshair touch-none pointer-events-auto"
-            onPointerDown={(event) => startDrawing(event.clientX, event.clientY)}
-            onPointerMove={(event) => draw(event.clientX, event.clientY)}
+            onPointerDown={(event) => startDrawing(event.pageX, event.pageY)}
+            onPointerMove={(event) => draw(event.pageX, event.pageY)}
             onPointerUp={stopDrawing}
             onPointerLeave={stopDrawing}
           />
