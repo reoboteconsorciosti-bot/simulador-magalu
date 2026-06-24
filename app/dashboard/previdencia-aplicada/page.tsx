@@ -84,7 +84,7 @@ export default function PrevidenciaAplicadaPage() {
   }, [creditValue, modality, application, months, incc, currentMonth])
 
   return (
-    <div className="min-h-screen text-foreground p-2 md:p-6 w-full max-w-full overflow-x-hidden" style={{ fontFamily: 'Inter, sans-serif' }}>
+    <div className="min-h-screen text-foreground p-2 md:p-6 w-full max-w-full overflow-x-hidden">
       <main className="w-full space-y-6 max-w-full">
         <div className="px-2">
           <h2 className="text-2xl md:text-3xl font-black text-foreground tracking-tight">Simulação de Valorização Patrimonial</h2>
