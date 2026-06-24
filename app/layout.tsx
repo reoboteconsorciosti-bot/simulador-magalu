@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
-import { Analytics } from '@vercel/analytics/next'
 import { Toaster } from '@/components/ui/sonner'
 import { ThemeProvider } from '@/components/theme-provider'
+import { VercelAnalytics } from '@/components/VercelAnalytics'
 import './globals.css'
 
 export const metadata: Metadata = {
@@ -24,8 +24,8 @@ export default function RootLayout({
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false} disableTransitionOnChange>
           {children}
           <Toaster />
+          {process.env.NODE_ENV === 'production' && <VercelAnalytics />}
         </ThemeProvider>
-        {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
     </html>
   )

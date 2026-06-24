@@ -8,7 +8,6 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { DrawingCanvas } from '@/components/drawing-canvas'
 import { toast } from 'sonner'
 import { Save, FileDown, RotateCcw, CreditCard, BarChart3, Calendar, CheckCircle, Wallet } from 'lucide-react'
 import { generateSimulationPDF } from '@/lib/pdf'
@@ -204,26 +203,25 @@ export default function SimulacaoPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">Nova Simulação</h1>
-        <p className="text-muted-foreground">
-          Simule propostas para Magalu Consórcio com cálculo em tempo real.
-        </p>
-      </div>
+        <div>
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <h1 className="text-2xl font-bold text-foreground">Nova Simulação</h1>
+              <p className="text-muted-foreground">
+                Simule propostas para Magalu Consórcio com cálculo em tempo real.
+              </p>
+            </div>
+          </div>
+        </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Input Form */}
         <Card>
           <CardHeader>
-            <div className="flex flex-wrap items-start justify-between gap-3">
-              <div>
-                <CardTitle>Dados da Simulação</CardTitle>
-                <CardDescription>
-                  Preencha os dados para calcular a proposta
-                </CardDescription>
-              </div>
-              <DrawingCanvas />
-            </div>
+            <CardTitle>Dados da Simulação</CardTitle>
+            <CardDescription>
+              Preencha os dados para calcular a proposta
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">

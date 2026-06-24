@@ -4,7 +4,6 @@ import { useMemo, useState } from 'react'
 import { NumericFormat } from 'react-number-format'
 import { calculateFinancialLeverage, formatCurrency } from '@/lib/calculations'
 import { useSharedSimulationStore } from '@/lib/store'
-import { DrawingCanvas } from '@/components/drawing-canvas'
 
 export default function AlavancagemFinanceiraPage() {
   const { 
@@ -52,17 +51,16 @@ export default function AlavancagemFinanceiraPage() {
   return (
     <div className="min-h-screen text-foreground p-3 md:p-6">
       <main className="w-full space-y-6 max-w-full">
-        <div className="px-2">
-          <h2 className="text-2xl md:text-3xl font-black text-foreground tracking-tight">Simulação de Valorização Patrimonial</h2>
-          <p className="text-muted-foreground mt-1">Multiplique o seu patrimônio utilizando consórcio imobiliário de forma planejada.</p>
+        <div className="flex flex-wrap items-start justify-between gap-3 px-2">
+          <div>
+            <h2 className="text-2xl md:text-3xl font-black text-foreground tracking-tight">Simulação de Valorização Patrimonial</h2>
+            <p className="text-muted-foreground mt-1">Multiplique o seu patrimônio utilizando consórcio imobiliário de forma planejada.</p>
+          </div>
         </div>
 
         {/* ENTRADAS (INPUTS) COMPACTAS E HORIZONTAIS NO TOPO */}
         <section className="bg-card rounded-2xl shadow-sm border border-border p-6 w-full">
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-            <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Dados da Operação (Altere os valores para simular)</h3>
-            <DrawingCanvas />
-          </div>
+          <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-4">Dados da Operação (Altere os valores para simular)</h3>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 w-full">
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-bold text-muted-foreground">Crédito Original</label>

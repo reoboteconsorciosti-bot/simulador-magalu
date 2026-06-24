@@ -8,7 +8,6 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useSharedSimulationStore } from '@/lib/store'
-import { DrawingCanvas } from '@/components/drawing-canvas'
 
 export default function PrevidenciaAplicadaPage() {
   const { 
@@ -96,7 +95,6 @@ export default function PrevidenciaAplicadaPage() {
         <section className="bg-card rounded-2xl shadow-sm border border-border p-6 w-full">
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
             <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Dados da Operação (Altere os valores para simular)</h3>
-            <DrawingCanvas />
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-4 w-full">
             <div className="flex flex-col gap-1.5">

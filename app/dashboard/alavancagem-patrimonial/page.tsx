@@ -4,7 +4,6 @@ import { useMemo, useState } from 'react'
 import { NumericFormat } from 'react-number-format'
 import { calculatePatrimonialLeverage, calculateSimulation, calculoCreditoContempladoPatrimonial, formatCurrency } from '@/lib/calculations/index'
 import { useSharedSimulationStore } from '@/lib/store'
-import { DrawingCanvas } from '@/components/drawing-canvas'
 
 export default function AlavancagemPatrimonialPage() {
   const { 
@@ -100,7 +99,6 @@ export default function AlavancagemPatrimonialPage() {
         <section className="bg-card rounded-2xl shadow-sm border border-border p-6 w-full">
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
             <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Dados de Operação (Altere os valores para simular)</h3>
-            <DrawingCanvas />
           </div>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 w-full">
             <div className="flex flex-col gap-1.5">
