@@ -48,7 +48,11 @@ export default function DashboardLayout({
             className="xl:hidden"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
-            <Menu className="h-5 w-5" />
+            {mobileMenuOpen ? (
+              <X className="h-5 w-5 transition-all duration-300 rotate-0" />
+            ) : (
+              <Menu className="h-5 w-5 transition-all duration-300 rotate-0" />
+            )}
           </Button>
           
           {/* Logo */}
@@ -97,31 +101,34 @@ export default function DashboardLayout({
       </header>
 
       {/* Mobile/Tablet dropdown menu */}
-      {mobileMenuOpen && (
-        <div className="bg-card border-b border-border px-4 py-3 xl:hidden">
-          <nav className="space-y-2">
-            {navigation.map((item) => {
-              const isActive = pathname === item.href;
-              return (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className={cn(
-                    "flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors",
-                    isActive
-                      ? "bg-primary text-primary-foreground"
-                      : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-                  )}
-                >
-                  <item.icon className="h-5 w-5" />
-                  {item.name}
-                </Link>
-              );
-            })}
-          </nav>
-        </div>
-      )}
+      <div
+        className={cn(
+          "bg-card border-b border-border px-4 xl:hidden overflow-hidden transition-all duration-300 ease-in-out",
+          mobileMenuOpen ? "max-h-96 py-3 opacity-100" : "max-h-0 py-0 opacity-0"
+        )}
+      >
+        <nav className="space-y-2">
+          {navigation.map((item) => {
+            const isActive = pathname === item.href;
+            return (
+              <Link
+                key={item.name}
+                href={item.href}
+                onClick={() => setMobileMenuOpen(false)}
+                className={cn(
+                  "flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200",
+                  isActive
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                )}
+              >
+                <item.icon className="h-5 w-5" />
+                {item.name}
+              </Link>
+            );
+          })}
+        </nav>
+      </div>
 
       {/* Page content */}
       <main className="flex-1 p-4 md:p-6 lg:p-8">{children}</main>
