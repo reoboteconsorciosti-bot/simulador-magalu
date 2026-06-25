@@ -374,9 +374,9 @@ export default function AlavancagemPatrimonialPage() {
                 <div className="rounded-2xl border border-border bg-background/60 p-5 space-y-5">
                   <div className="rounded-2xl bg-gradient-to-r from-amber-400 via-amber-500 to-orange-500 p-5 shadow-lg shadow-amber-500/20 text-white relative overflow-hidden">
                     <div className="absolute -right-8 -bottom-8 h-28 w-28 rounded-full bg-white/10" />
-                    <span className="text-[10px] font-black uppercase tracking-widest text-amber-100 block mb-2">Patrimônio + Renda Passiva</span>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-amber-100 block mb-2">Patrimônio Imobiliário</span>
                     <span className="text-3xl xl:text-4xl font-black text-white block break-all">
-                      {formatCurrency(patrimonioMaisRendaPassiva)}
+                      {formatCurrency(valorAtualizadoImovel)}
                     </span>
                     <span className="text-[10px] font-semibold uppercase tracking-wide text-amber-100 block mt-2">
                       Ativo consolidado da operação
@@ -384,9 +384,8 @@ export default function AlavancagemPatrimonialPage() {
                   </div>
                   <div className="space-y-3">
                     <div className="flex items-center justify-between gap-4 rounded-xl bg-card border border-border px-4 py-3">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Patrimônio</span>
+                      <span className="text-[25px] font-bold uppercase tracking-wider text-muted-foreground">+</span>
                       <span className="text-base xl:text-lg font-black text-foreground text-right break-all">
-                        {formatCurrency(valorAtualizadoImovel)}
                       </span>
                     </div>
                     <div className="rounded-2xl bg-gradient-to-r from-emerald-500 via-emerald-600 to-green-600 px-4 py-4 text-white shadow-lg shadow-emerald-500/20 relative overflow-hidden">
@@ -394,12 +393,6 @@ export default function AlavancagemPatrimonialPage() {
                       <span className="text-[10px] font-black uppercase tracking-widest text-emerald-100 block mb-1">Renda Passiva</span>
                       <span className="text-2xl xl:text-3xl font-black text-white block break-all">
                         {formatCurrency(results?.rendaPassiva ?? 0)}
-                      </span>
-                    </div>
-                    <div className="rounded-xl border border-border bg-card px-4 py-4">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block mb-1">Composição Final</span>
-                      <span className="text-sm xl:text-base font-semibold text-foreground block">
-                        Patrimônio atualizado somado à renda passiva acumulada na operação.
                       </span>
                     </div>
                   </div>
