@@ -53,7 +53,7 @@ export default function AlavancagemFinanceiraPage() {
       <main className="w-full space-y-6 max-w-full">
         <div className="flex flex-wrap items-start justify-between gap-3 px-2">
           <div>
-            <h2 className="text-2xl md:text-3xl font-black text-foreground tracking-tight">Simulação de Valorização Patrimonial</h2>
+            <h2 className="text-2xl md:text-3xl font-black text-foreground tracking-tight">Simulação de Valorização Financeira</h2>
             <p className="text-muted-foreground mt-1">Multiplique o seu patrimônio utilizando consórcio imobiliário de forma planejada.</p>
           </div>
         </div>

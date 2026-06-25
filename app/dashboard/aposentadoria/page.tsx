@@ -87,7 +87,7 @@ export default function AposentadoriaPage() {
     <div className="min-h-screen text-foreground p-2 md:p-6 w-full max-w-full overflow-x-hidden">
       <main className="w-full space-y-6 max-w-full">
         <div className="px-2">
-          <h2 className="text-2xl md:text-3xl font-black text-foreground tracking-tight">Simulação de Valorização Patrimonial</h2>
+          <h2 className="text-2xl md:text-3xl font-black text-foreground tracking-tight">Simulação de Valorização para Aposentadoria</h2>
           <p className="text-muted-foreground mt-1">Multiplique o seu patrimônio utilizando consórcio imobiliário de forma planejada.</p>
         </div>
         

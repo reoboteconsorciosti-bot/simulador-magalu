@@ -264,7 +264,7 @@ export default function AlavancagemPatrimonialPage() {
                   <div className="bg-card border border-border rounded-xl overflow-hidden shadow-sm flex flex-col">
                     <div className="h-28 bg-cover bg-center" style={{ backgroundImage: 'url(https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?q=80&w=400&auto=format&fit=crop)' }}></div>
                     <div className="p-3 text-center bg-accent/30 border-t border-border">
-                      <span className="text-xs font-extrabold text-foreground">Comprar Apto</span>
+                      <span className="text-xs font-extrabold text-foreground">Comprar Apartamento</span>
                     </div>
                   </div>
                 </div>
