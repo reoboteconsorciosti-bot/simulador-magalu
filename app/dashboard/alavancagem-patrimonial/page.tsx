@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import { NumericFormat } from 'react-number-format'
+import { House } from 'lucide-react'
 import { calculatePatrimonialLeverage, calculateSimulation, calculoCreditoContempladoPatrimonial, formatCurrency } from '@/lib/calculations/index'
 import { useSharedSimulationStore } from '@/lib/store'
 
@@ -83,10 +84,18 @@ export default function AlavancagemPatrimonialPage() {
 
   const totalPagoConsorcio = results?.totalPagoConsorcio || 0
   const alugueisRecebidos = results?.alugueisRecebidos || 0
+  const creditoContemplado = creditoPatrimonial ?? results?.creditContemplado ?? 0
+  const prazoRestante = months && contemplationMonth ? Math.max(0, months - contemplationMonth) : 0
+  const parcelaPosContemplacao = simulationResults?.finalPaymentAfterContemplation ?? 0
+  const valorAtualizadoImovel = results?.valorImovelCorrigido ?? 0
+  const aluguelInicial = results?.aluguel ?? 0
+  const sobrasOuDesembolso = aluguelInicial - parcelaPosContemplacao
+  const isSobraInicial = sobrasOuDesembolso >= 0
   const lucroCustoFinal = alugueisRecebidos > totalPagoConsorcio ? 
     alugueisRecebidos - totalPagoConsorcio : 
     totalPagoConsorcio - alugueisRecebidos
   const isLucro = alugueisRecebidos > totalPagoConsorcio
+  const patrimonioMaisRendaPassiva = valorAtualizadoImovel + (results?.rendaPassiva ?? 0)
 
   return (
     <div className="min-h-screen text-foreground p-2 md:p-6">
@@ -220,29 +229,29 @@ export default function AlavancagemPatrimonialPage() {
           </div>
 
           <div className="overflow-x-auto pb-4 w-full custom-scrollbar">
-            <div className="flex items-stretch justify-between gap-6 w-full" style={{ minWidth: '1360px' }}>
+            <div className="flex items-stretch justify-between gap-6 w-full" style={{ minWidth: '1420px' }}>
 
-              <div className="flex-1 bg-primary/5 border-2 border-primary/20 rounded-2xl p-6 flex flex-col justify-between gap-5 transition-all duration-300 hover:shadow-md" style={{ minWidth: '290px' }}>
+              <div className="flex-1 bg-primary/5 border-2 border-primary/20 rounded-2xl p-6 flex flex-col gap-5 transition-all duration-300 hover:shadow-md" style={{ minWidth: '280px' }}>
                 <div>
                   <span className="text-[10px] font-black text-primary uppercase tracking-widest bg-primary/10 px-2.5 py-1 rounded-full">Passo 01: Liberação</span>
                 </div>
                 <div className="flex flex-col gap-4">
-                  <div className="bg-card rounded-xl p-4 border border-primary/10 shadow-sm">
-                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block mb-1">Crédito Contemplado</span>
+                  <div className="bg-card rounded-xl p-4 border border-primary/30 shadow-sm shadow-primary/10">
+                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block mb-1">Cred. Cont.</span>
                     <span className="text-2xl xl:text-3xl font-black text-primary tracking-tight break-all">
-                      {formatCurrency(creditoPatrimonial ?? results?.creditContemplado ?? 0)}
+                      {formatCurrency(creditoContemplado)}
                     </span>
                   </div>
                   <div className="bg-card rounded-xl p-4 border border-primary/10 shadow-sm">
-                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block mb-1">Prazo Restante</span>
+                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block mb-1">Prazo Rest.</span>
                     <span className="text-2xl xl:text-3xl font-black text-foreground tracking-tight">
-                      {(months && contemplationMonth ? Math.max(0, months - contemplationMonth) : 0)} Meses
+                      {prazoRestante} Meses
                     </span>
                   </div>
                   <div className="bg-card rounded-xl p-4 border border-primary/10 shadow-sm">
-                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block mb-1">Total Pago Consórcio</span>
+                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block mb-1">Parc. Pós Cont.</span>
                     <span className="text-2xl xl:text-3xl font-black text-foreground tracking-tight break-all">
-                      {formatCurrency(results?.totalPagoConsorcio ?? 0)}
+                      {formatCurrency(parcelaPosContemplacao)}
                     </span>
                   </div>
                 </div>
@@ -250,116 +259,149 @@ export default function AlavancagemPatrimonialPage() {
 
               <div className="flex items-center justify-center text-amber-500 font-extrabold text-3xl">→</div>
 
-              <div className="flex-[1.5] bg-amber-50/20 dark:bg-amber-900/10 border-2 border-amber-300 dark:border-amber-800 rounded-2xl p-6 flex flex-col justify-between gap-5 transition-all duration-300 hover:shadow-md" style={{ minWidth: '440px' }}>
-                <div className="text-center">
+              <div className="flex-1 bg-amber-50/20 dark:bg-amber-900/10 border-2 border-amber-300 dark:border-amber-800 rounded-2xl p-6 flex flex-col gap-5 transition-all duration-300 hover:shadow-md" style={{ minWidth: '300px' }}>
+                <div className="flex items-center justify-between gap-3">
                   <span className="text-[10px] font-black text-amber-600 dark:text-amber-400 uppercase tracking-widest bg-amber-100 dark:bg-amber-900/30 px-2.5 py-1 rounded-full">Passo 02: Aquisição Patrimonial</span>
+                  <House className="h-5 w-5 text-amber-500" />
                 </div>
-                <div className="flex flex-col gap-4">
+                <div className="grid grid-cols-2 gap-4">
                   <div className="bg-card border border-border rounded-xl overflow-hidden shadow-sm flex flex-col">
-                    <div className="h-28 bg-cover bg-center" style={{ backgroundImage: 'url(https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=400&auto=format&fit=crop)' }}></div>
+                    <div className="h-24 bg-cover bg-center" style={{ backgroundImage: 'url(https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=400&auto=format&fit=crop)' }} />
                     <div className="p-3 text-center bg-accent/30 border-t border-border">
-                      <span className="text-xs font-extrabold text-foreground">Comprar Casa</span>
+                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-foreground">Casa</span>
                     </div>
                   </div>
                   <div className="bg-card border border-border rounded-xl overflow-hidden shadow-sm flex flex-col">
-                    <div className="h-28 bg-cover bg-center" style={{ backgroundImage: 'url(https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?q=80&w=400&auto=format&fit=crop)' }}></div>
+                    <div className="h-24 bg-cover bg-center" style={{ backgroundImage: 'url(https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?q=80&w=400&auto=format&fit=crop)' }} />
                     <div className="p-3 text-center bg-accent/30 border-t border-border">
-                      <span className="text-xs font-extrabold text-foreground">Comprar Apartamento</span>
+                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-foreground">Apartamento</span>
                     </div>
                   </div>
                 </div>
                 <div className="flex flex-col gap-4">
-                  <div className="bg-card rounded-xl p-4 border border-amber-200 dark:border-amber-800 shadow-sm min-w-0">
-                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block mb-1">Valor Imóvel Corrigido</span>
-                    <span className="text-xl xl:text-2xl font-black text-amber-600 dark:text-amber-400 tracking-tight block break-all">
-                      {formatCurrency(results?.valorImovelCorrigido ?? 0)}
+                  <div className="bg-card rounded-xl p-4 border border-amber-200 dark:border-amber-800 shadow-sm">
+                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block mb-1">Valor Imóvel</span>
+                    <span className="text-2xl xl:text-3xl font-black text-amber-600 dark:text-amber-400 tracking-tight block break-all">
+                      {formatCurrency(valorAtualizadoImovel)}
                     </span>
                   </div>
-                     <div className="bg-card rounded-xl p-3 border border-amber-100 dark:border-amber-800 shadow-sm flex justify-between items-center">
-                    <div className="w-full min-w-0">
-                      <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">Aluguéis Recebidos</span>
-                      <span className="text-lg xl:text-xl font-extrabold text-foreground block break-all">
-                        {formatCurrency(results?.alugueisRecebidos ?? 0)}
-                      </span>
-                    </div>
+                  <div className="bg-card rounded-xl p-4 border border-amber-100 dark:border-amber-800 shadow-sm">
+                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block mb-1">Aluguel Inicial</span>
+                    <span className="text-xl xl:text-2xl font-black text-foreground tracking-tight block break-all">
+                      {formatCurrency(aluguelInicial)}
+                    </span>
+                  </div>
+                  <div
+                    className="bg-card rounded-xl p-4 border shadow-sm"
+                    style={{
+                      borderColor: isSobraInicial ? '#8b5cf6' : '#f97316',
+                    }}
+                  >
+                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block mb-1">Sobras ou Desembolso</span>
+                    <span
+                      className="text-xl xl:text-2xl font-black tracking-tight block break-all"
+                      style={{
+                        color: isSobraInicial ? '#8b5cf6' : '#f97316',
+                      }}
+                    >
+                      {formatCurrency(Math.abs(sobrasOuDesembolso))}
+                    </span>
+                    <span className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground block mt-1">
+                      {isSobraInicial ? 'Saldo positivo inicial' : 'Aporte inicial necessário'}
+                    </span>
                   </div>
                 </div>
               </div>
 
               <div className="flex items-center justify-center text-amber-500 font-extrabold text-3xl">→</div>
 
-              <div className="flex-1 bg-emerald-50/50 dark:bg-emerald-900/10 border-2 border-emerald-200 dark:border-emerald-800 rounded-2xl p-6 flex flex-col justify-between gap-5 transition-all duration-300 hover:shadow-md" style={{ minWidth: '290px' }}>
+              <div className="flex-1 bg-emerald-50/50 dark:bg-emerald-900/10 border-2 border-emerald-200 dark:border-emerald-800 rounded-2xl p-6 flex flex-col gap-5 transition-all duration-300 hover:shadow-md" style={{ minWidth: '320px' }}>
                 <div>
-                  <span className="text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest bg-emerald-100 dark:bg-emerald-900/30 px-2.5 py-1 rounded-full">Passo 03: Locação e Ganhos</span>
+                  <span className="text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest bg-emerald-100 dark:bg-emerald-900/30 px-2.5 py-1 rounded-full">Passo 03: Métricas de Acumulação</span>
                 </div>
                 <div className="flex flex-col gap-3">
-                  <div className="bg-card rounded-xl p-3 border border-emerald-100 dark:border-emerald-800 shadow-sm flex justify-between items-center">
-                    <div className="w-full min-w-0">
-                      <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">Aluguel Inicial</span>
-                      <span className="text-lg xl:text-xl font-extrabold text-emerald-600 dark:text-emerald-400 block break-all">
-                        {formatCurrency(results?.aluguel ?? 0)}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="bg-card rounded-xl p-3 border border-emerald-100 dark:border-emerald-800 shadow-sm flex justify-between items-center">
-                    <div className="w-full min-w-0">
-                      <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">Pós Contemplação</span>
-                      <span className="text-lg xl:text-xl font-extrabold text-foreground block break-all">
-                        {formatCurrency(simulationResults?.finalPaymentAfterContemplation ?? 0)}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="bg-card rounded-xl p-4 border border-green-200 dark:border-green-800 shadow-sm min-w-0">
-                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block mb-1">% Pago no Imóvel</span>
-                    <span className="text-xl xl:text-2xl font-black text-foreground tracking-tight block">
-                      {results?.percentPagoImovel.toFixed(1) || '0.0'}%
+                  <div className="bg-card rounded-xl p-4 border border-emerald-200 dark:border-emerald-800 shadow-sm shadow-emerald-500/10">
+                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block mb-1">Valor Atualizado Imóvel</span>
+                    <span className="text-2xl xl:text-3xl font-black text-emerald-600 dark:text-emerald-400 tracking-tight block break-all">
+                      {formatCurrency(valorAtualizadoImovel)}
                     </span>
                   </div>
-                  <div 
-                    className="bg-card rounded-xl p-4 border shadow-sm min-w-0"
-                    style={{ 
-                      borderColor: isLucro ? '#22c55e' : '#ef4444'
+                  <div className="bg-card rounded-xl p-3 border border-emerald-100 dark:border-emerald-800 shadow-sm">
+                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block mb-1">Aluguel Recebido</span>
+                    <span className="text-lg xl:text-xl font-extrabold text-foreground block break-all">
+                      {formatCurrency(alugueisRecebidos)}
+                    </span>
+                  </div>
+                  <div className="bg-card rounded-xl p-3 border border-emerald-100 dark:border-emerald-800 shadow-sm">
+                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block mb-1">Total Pago Consórcio</span>
+                    <span className="text-lg xl:text-xl font-extrabold text-foreground block break-all">
+                      {formatCurrency(totalPagoConsorcio)}
+                    </span>
+                  </div>
+                  <div
+                    className="bg-card rounded-xl p-3 border shadow-sm"
+                    style={{
+                      borderColor: isLucro ? '#22c55e' : '#ef4444',
                     }}
                   >
                     <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block mb-1">
-                      {isLucro ? 'Lucro Total Acumulado' : 'Custo Final'}
+                      Custo ou Lucro
                     </span>
-                    <span 
-                      className="text-xl xl:text-2xl font-black tracking-tight block"
-                      style={{ 
-                        color: isLucro ? '#22c55e' : '#ef4444'
+                    <span
+                      className="text-lg xl:text-xl font-extrabold tracking-tight block break-all"
+                      style={{
+                        color: isLucro ? '#22c55e' : '#ef4444',
                       }}
                     >
                       {formatCurrency(lucroCustoFinal)}
                     </span>
                   </div>
+                  <div className="bg-card rounded-xl p-3 border border-emerald-100 dark:border-emerald-800 shadow-sm">
+                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block mb-1">% Pago</span>
+                    <span className="text-lg xl:text-xl font-extrabold text-foreground block">
+                      {results?.percentPagoImovel?.toFixed(1) ?? '0.0'}%
+                    </span>
+                  </div>
                 </div>
               </div>
 
               <div className="flex items-center justify-center text-amber-500 font-extrabold text-3xl">→</div>
 
-              <div className="flex-[1.2] bg-accent border-2 border-border rounded-3xl p-6 flex flex-col justify-between gap-6 transition-all duration-300 hover:shadow-xl" style={{ minWidth: '320px' }}>
+              <div className="flex-[1.15] bg-accent border-2 border-border rounded-3xl p-6 flex flex-col gap-6 transition-all duration-300 hover:shadow-xl" style={{ minWidth: '340px' }}>
                 <div>
                   <span className="text-[10px] font-black text-amber-500 uppercase tracking-widest bg-background px-3 py-1.5 rounded-full border border-border">Resultado Final</span>
                 </div>
-                <div className="flex flex-col gap-4">
-                  <div className="bg-gradient-to-r from-amber-400 to-amber-500 rounded-2xl p-5 shadow-lg shadow-amber-500/20 text-white relative overflow-hidden min-w-0">
-                    <div className="absolute -right-6 -bottom-6 w-24 h-24 rounded-full bg-white/10"></div>
-                    <span className="text-[10px] font-black uppercase tracking-widest text-amber-100 block mb-1">Renda Passiva do Aluguel</span>
-                    <span className="text-2xl xl:text-3xl font-black text-white block break-all">
-                      {formatCurrency(results?.rendaPassiva ?? 0)}
+                <div className="rounded-2xl border border-border bg-background/60 p-5 space-y-5">
+                  <div className="rounded-2xl bg-gradient-to-r from-amber-400 via-amber-500 to-orange-500 p-5 shadow-lg shadow-amber-500/20 text-white relative overflow-hidden">
+                    <div className="absolute -right-8 -bottom-8 h-28 w-28 rounded-full bg-white/10" />
+                    <span className="text-[10px] font-black uppercase tracking-widest text-amber-100 block mb-2">Patrimônio + Renda Passiva</span>
+                    <span className="text-3xl xl:text-4xl font-black text-white block break-all">
+                      {formatCurrency(patrimonioMaisRendaPassiva)}
                     </span>
-                    <span className="text-[9px] font-medium text-amber-100 block mt-1">Estimado a longo prazo</span>
+                    <span className="text-[10px] font-semibold uppercase tracking-wide text-amber-100 block mt-2">
+                      Ativo consolidado da operação
+                    </span>
                   </div>
-                  <div className="bg-gradient-to-r from-purple-500 to-violet-600 rounded-2xl p-5 shadow-lg shadow-purple-500/20 text-white relative overflow-hidden min-w-0">
-                    <div className="absolute -right-6 -bottom-6 w-24 h-24 rounded-full bg-white/10"></div>
-                    <span className="text-[10px] font-black uppercase tracking-widest text-purple-100 block mb-1">Sobras (Lucro Mensal)</span>
-                    <span className="text-2xl xl:text-3xl font-black text-white block break-all">
-                      {results && simulationResults ? 
-                        formatCurrency(Math.max(0, results.aluguel - simulationResults.finalPaymentAfterContemplation)) : 
-                        formatCurrency(0)
-                      }
-                    </span>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between gap-4 rounded-xl bg-card border border-border px-4 py-3">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Patrimônio</span>
+                      <span className="text-base xl:text-lg font-black text-foreground text-right break-all">
+                        {formatCurrency(valorAtualizadoImovel)}
+                      </span>
+                    </div>
+                    <div className="rounded-2xl bg-gradient-to-r from-emerald-500 via-emerald-600 to-green-600 px-4 py-4 text-white shadow-lg shadow-emerald-500/20 relative overflow-hidden">
+                      <div className="absolute -right-6 -bottom-6 h-20 w-20 rounded-full bg-white/10" />
+                      <span className="text-[10px] font-black uppercase tracking-widest text-emerald-100 block mb-1">Renda Passiva</span>
+                      <span className="text-2xl xl:text-3xl font-black text-white block break-all">
+                        {formatCurrency(results?.rendaPassiva ?? 0)}
+                      </span>
+                    </div>
+                    <div className="rounded-xl border border-border bg-card px-4 py-4">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block mb-1">Composição Final</span>
+                      <span className="text-sm xl:text-base font-semibold text-foreground block">
+                        Patrimônio atualizado somado à renda passiva acumulada na operação.
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
