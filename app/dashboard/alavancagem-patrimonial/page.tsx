@@ -187,22 +187,34 @@ export default function AlavancagemPatrimonialPage() {
             <span className="text-xs font-bold text-primary bg-primary/10 px-3 py-1.5 rounded-full uppercase tracking-wider">Cálculos Automatizados</span>
           </div>
 
-          <div className="bg-accent/50 rounded-2xl border border-border p-6 w-full">
-            <p className="text-sm font-bold text-muted-foreground mb-3">Momento Estratégico da Contemplação</p>
-            <div className="relative py-8">
-              <div className="h-2.5 w-full bg-muted rounded-full relative">
-                <div className="absolute left-0 top-0 h-full bg-amber-500 rounded-full transition-all duration-300" style={{ width: `${timelinePercent}%` }}></div>
-                <div
-                  className="absolute top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-amber-500 border-4 border-card shadow-lg shadow-amber-500/50 flex items-center justify-center cursor-pointer transition-all duration-300"
-                  style={{ left: `${timelinePercent}%` }}
-                >
-                  <span className="text-[10px] font-black text-white">{contemplationMonth || 1}</span>
+          {/* LINHA DO TEMPO MINIMALISTA COM PREENCHIMENTO LARANJA */}
+          <div className="w-full mb-8">
+            <div className="relative py-6">
+              <div className="text-xs font-bold text-muted-foreground mb-3 uppercase tracking-wider">Momento Estratégico da Contemplação</div>
+              <div className="h-2 w-full bg-muted rounded-full relative">
+                {/* Progresso preenchido em laranja vibrante */}
+                <div className="absolute left-0 top-0 h-full bg-[#f39c12] rounded-full transition-all duration-300" style={{ width: `${timelinePercent}%` }}></div>
+                
+                {/* Ponto Extremo Esquerdo: 1º Mês */}
+                <div className="absolute -bottom-6 left-0 text-xs font-bold text-muted-foreground">
+                  1º Mês
+                </div>
+
+                {/* Indicador Dinâmico Móvel (Bolinha com o Mês atual) */}
+                <div className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-card border-[3px] border-[#f39c12] shadow-md flex items-center justify-center cursor-pointer transition-all duration-300" style={{ left: `${timelinePercent}%` }}>
+                  <span className="text-xs font-black text-foreground">{contemplationMonth || 1}</span>
+                </div>
+
+                {/* Ponto Extremo Direito: Prazo Total */}
+                <div className="absolute -bottom-6 right-0 text-xs font-bold text-muted-foreground">
+                  <span>{months || 220} Meses</span>
                 </div>
               </div>
-              <div className="flex justify-between items-center mt-4 text-xs font-semibold text-muted-foreground">
-                <span>1º Mês</span>
-                <span className="text-amber-500 font-bold bg-amber-50 dark:bg-amber-900/30 px-3 py-1 rounded-full border border-amber-200 dark:border-amber-800">Contemplado no Mês: <span className="font-extrabold">{contemplationMonth || 1}</span></span>
-                <span>{months || 220} Meses</span>
+              {/* Label Central de Status */}
+              <div className="flex justify-center mt-6">
+                <span className="text-[#f39c12] font-bold bg-amber-50 dark:bg-amber-900/30 px-4 py-1 rounded-full border border-amber-200 dark:border-amber-800 text-xs">
+                  Contemplado no Mês: <span className="font-extrabold">{contemplationMonth || 1}</span>
+                </span>
               </div>
             </div>
           </div>
@@ -214,20 +226,20 @@ export default function AlavancagemPatrimonialPage() {
                 <div>
                   <span className="text-[10px] font-black text-primary uppercase tracking-widest bg-primary/10 px-2.5 py-1 rounded-full">Passo 01: Liberação</span>
                 </div>
-                <div className="flex flex-wrap gap-4">
-                  <div className="bg-card rounded-xl p-4 border border-primary/10 shadow-sm flex-1 min-w-[180px]">
+                <div className="flex flex-col gap-4">
+                  <div className="bg-card rounded-xl p-4 border border-primary/10 shadow-sm">
                     <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block mb-1">Crédito Contemplado</span>
                     <span className="text-2xl xl:text-3xl font-black text-primary tracking-tight break-all">
                       {formatCurrency(creditoPatrimonial ?? results?.creditContemplado ?? 0)}
                     </span>
                   </div>
-                  <div className="bg-card rounded-xl p-4 border border-primary/10 shadow-sm flex-1 min-w-[180px]">
+                  <div className="bg-card rounded-xl p-4 border border-primary/10 shadow-sm">
                     <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block mb-1">Prazo Restante</span>
                     <span className="text-2xl xl:text-3xl font-black text-foreground tracking-tight">
                       {(months && contemplationMonth ? Math.max(0, months - contemplationMonth) : 0)} Meses
                     </span>
                   </div>
-                  <div className="bg-card rounded-xl p-4 border border-primary/10 shadow-sm flex-1 min-w-[180px]">
+                  <div className="bg-card rounded-xl p-4 border border-primary/10 shadow-sm">
                     <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block mb-1">Total Pago Consórcio</span>
                     <span className="text-2xl xl:text-3xl font-black text-foreground tracking-tight break-all">
                       {formatCurrency(results?.totalPagoConsorcio ?? 0)}
@@ -242,7 +254,7 @@ export default function AlavancagemPatrimonialPage() {
                 <div className="text-center">
                   <span className="text-[10px] font-black text-amber-600 dark:text-amber-400 uppercase tracking-widest bg-amber-100 dark:bg-amber-900/30 px-2.5 py-1 rounded-full">Passo 02: Aquisição Patrimonial</span>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="flex flex-col gap-4">
                   <div className="bg-card border border-border rounded-xl overflow-hidden shadow-sm flex flex-col">
                     <div className="h-28 bg-cover bg-center" style={{ backgroundImage: 'url(https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=400&auto=format&fit=crop)' }}></div>
                     <div className="p-3 text-center bg-accent/30 border-t border-border">
@@ -256,18 +268,20 @@ export default function AlavancagemPatrimonialPage() {
                     </div>
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="flex flex-col gap-4">
                   <div className="bg-card rounded-xl p-4 border border-amber-200 dark:border-amber-800 shadow-sm min-w-0">
                     <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block mb-1">Valor Imóvel Corrigido</span>
                     <span className="text-xl xl:text-2xl font-black text-amber-600 dark:text-amber-400 tracking-tight block break-all">
                       {formatCurrency(results?.valorImovelCorrigido ?? 0)}
                     </span>
                   </div>
-                  <div className="bg-card rounded-xl p-4 border border-amber-200 dark:border-amber-800 shadow-sm min-w-0">
-                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block mb-1">% Pago no Imóvel</span>
-                    <span className="text-xl xl:text-2xl font-black text-foreground tracking-tight block">
-                      {results?.percentPagoImovel.toFixed(1) || '0.0'}%
-                    </span>
+                     <div className="bg-card rounded-xl p-3 border border-amber-100 dark:border-amber-800 shadow-sm flex justify-between items-center">
+                    <div className="w-full min-w-0">
+                      <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">Aluguéis Recebidos</span>
+                      <span className="text-lg xl:text-xl font-extrabold text-foreground block break-all">
+                        {formatCurrency(results?.alugueisRecebidos ?? 0)}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -278,7 +292,7 @@ export default function AlavancagemPatrimonialPage() {
                 <div>
                   <span className="text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest bg-emerald-100 dark:bg-emerald-900/30 px-2.5 py-1 rounded-full">Passo 03: Locação e Ganhos</span>
                 </div>
-                <div className="space-y-3">
+                <div className="flex flex-col gap-3">
                   <div className="bg-card rounded-xl p-3 border border-emerald-100 dark:border-emerald-800 shadow-sm flex justify-between items-center">
                     <div className="w-full min-w-0">
                       <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">Aluguel Inicial</span>
@@ -295,24 +309,29 @@ export default function AlavancagemPatrimonialPage() {
                       </span>
                     </div>
                   </div>
-                  <div className="bg-card rounded-xl p-3 border border-emerald-100 dark:border-emerald-800 shadow-sm flex justify-between items-center">
-                    <div className="w-full min-w-0">
-                      <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">Aluguéis Recebidos</span>
-                      <span className="text-lg xl:text-xl font-extrabold text-foreground block break-all">
-                        {formatCurrency(results?.alugueisRecebidos ?? 0)}
-                      </span>
-                    </div>
+                  <div className="bg-card rounded-xl p-4 border border-green-200 dark:border-green-800 shadow-sm min-w-0">
+                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block mb-1">% Pago no Imóvel</span>
+                    <span className="text-xl xl:text-2xl font-black text-foreground tracking-tight block">
+                      {results?.percentPagoImovel.toFixed(1) || '0.0'}%
+                    </span>
                   </div>
-                  <div className="bg-card rounded-xl p-3 border border-emerald-100 dark:border-emerald-800 shadow-sm flex justify-between items-center">
-                    <div className="w-full min-w-0">
-                      <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">Sobras (Lucro Mensal)</span>
-                      <span className="text-lg xl:text-xl font-extrabold text-foreground block break-all">
-                        {results && simulationResults ? 
-                          formatCurrency(Math.max(0, results.aluguel - simulationResults.finalPaymentAfterContemplation)) : 
-                          formatCurrency(0)
-                        }
-                      </span>
-                    </div>
+                  <div 
+                    className="bg-card rounded-xl p-4 border shadow-sm min-w-0"
+                    style={{ 
+                      borderColor: isLucro ? '#22c55e' : '#ef4444'
+                    }}
+                  >
+                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block mb-1">
+                      {isLucro ? 'Lucro Total Acumulado' : 'Custo Final'}
+                    </span>
+                    <span 
+                      className="text-xl xl:text-2xl font-black tracking-tight block"
+                      style={{ 
+                        color: isLucro ? '#22c55e' : '#ef4444'
+                      }}
+                    >
+                      {formatCurrency(lucroCustoFinal)}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -323,7 +342,7 @@ export default function AlavancagemPatrimonialPage() {
                 <div>
                   <span className="text-[10px] font-black text-amber-500 uppercase tracking-widest bg-background px-3 py-1.5 rounded-full border border-border">Resultado Final</span>
                 </div>
-                <div className="space-y-4">
+                <div className="flex flex-col gap-4">
                   <div className="bg-gradient-to-r from-amber-400 to-amber-500 rounded-2xl p-5 shadow-lg shadow-amber-500/20 text-white relative overflow-hidden min-w-0">
                     <div className="absolute -right-6 -bottom-6 w-24 h-24 rounded-full bg-white/10"></div>
                     <span className="text-[10px] font-black uppercase tracking-widest text-amber-100 block mb-1">Renda Passiva do Aluguel</span>
@@ -332,25 +351,18 @@ export default function AlavancagemPatrimonialPage() {
                     </span>
                     <span className="text-[9px] font-medium text-amber-100 block mt-1">Estimado a longo prazo</span>
                   </div>
-                  <div 
-                    className="rounded-2xl p-5 shadow-lg text-white relative overflow-hidden min-w-0"
-                    style={{ 
-                      background: isLucro ? 'linear-gradient(to right, #22c55e, #16a34a)' : 'linear-gradient(to right, #ef4444, #dc2626)',
-                      boxShadow: isLucro ? '0 10px 15px rgba(34, 197, 94, 0.2)' : '0 10px 15px rgba(239, 68, 68, 0.2)'
-                    }}
-                  >
+                  <div className="bg-gradient-to-r from-purple-500 to-violet-600 rounded-2xl p-5 shadow-lg shadow-purple-500/20 text-white relative overflow-hidden min-w-0">
                     <div className="absolute -right-6 -bottom-6 w-24 h-24 rounded-full bg-white/10"></div>
-                    <span className="text-[10px] font-black uppercase tracking-widest text-white/90 block mb-1">
-                      {isLucro ? 'Lucro Total Acumulado' : 'Custo Final'}
-                    </span>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-purple-100 block mb-1">Sobras (Lucro Mensal)</span>
                     <span className="text-2xl xl:text-3xl font-black text-white block break-all">
-                      {formatCurrency(lucroCustoFinal)}
+                      {results && simulationResults ? 
+                        formatCurrency(Math.max(0, results.aluguel - simulationResults.finalPaymentAfterContemplation)) : 
+                        formatCurrency(0)
+                      }
                     </span>
-                    <span className="text-[9px] font-medium text-white/80 block mt-1"></span>
                   </div>
                 </div>
               </div>
-
             </div>
           </div>
         </section>

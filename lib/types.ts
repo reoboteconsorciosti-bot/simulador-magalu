@@ -133,6 +133,7 @@ export interface PrevidenciaAplicadaInput {
 
 export interface PrevidenciaAplicadaResult {
   credit: number
+  creditContemplado: number
   valorCorrigido: number
   parcelaCheia: number
   parcelaPosContemplacao: number

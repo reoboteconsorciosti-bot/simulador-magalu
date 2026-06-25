@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useSharedSimulationStore } from '@/lib/store'
 
-export default function PrevidenciaAplicadaPage() {
+export default function AposentadoriaPage() {
   const { 
     creditValue, 
     months,
@@ -157,7 +157,7 @@ export default function PrevidenciaAplicadaPage() {
         <section className="bg-card rounded-2xl shadow-sm border border-border p-6 md:p-8 w-full max-w-full">
             
           <div className="flex items-center justify-between border-b border-border pb-5 mb-6">
-            <h3 className="text-lg font-bold text-foreground">Resultados da Previdência Aplicada</h3>
+            <h3 className="text-lg font-bold text-foreground">Resultados da Aposentadoria</h3>
             <span className="text-xs font-semibold text-primary bg-primary/10 px-3 py-1.5 rounded-full uppercase tracking-wider">Cálculos Automatizados</span>
           </div>
 
@@ -199,10 +199,10 @@ export default function PrevidenciaAplicadaPage() {
             {/* COLUNA DA ESQUERDA */}
             <div className="flex flex-col gap-4">
               
-              {/* Crédito */}
+              {/* Crédito Contemplado */}
               <div className="bg-card p-6 rounded-2xl border border-border border-l-[6px] border-l-primary shadow-sm flex flex-col justify-center min-h-[100px]">
-                <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1">Crédito Original</span>
-                <span className="text-2xl md:text-3xl font-black text-foreground tracking-tight break-all">{formatCurrency(creditValue ?? 0)}</span>
+                <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1">Crédito Contemplado</span>
+                <span className="text-2xl md:text-3xl font-black text-foreground tracking-tight break-all">{formatCurrency(results?.creditContemplado ?? 0)}</span>
               </div>
 
               {/* Parcela Cheia */}

@@ -147,22 +147,34 @@ export default function AlavancagemFinanceiraPage() {
             <span className="text-xs font-bold text-primary bg-primary/10 px-3 py-1.5 rounded-full uppercase tracking-wider">Cálculos Automatizados</span>
           </div>
 
-          {/* Linha do Tempo Dinâmica */}
-          <div className="bg-accent/50 rounded-2xl border border-border p-6 w-full">
-            <p className="text-sm font-bold text-muted-foreground mb-3">Evolução pelo Mês de Contemplação</p>
-            <div className="relative py-8">
-              {/* Barra de progresso */}
-              <div className="h-2.5 w-full bg-muted rounded-full relative">
-                <div className="absolute left-0 top-0 h-full bg-amber-500 rounded-full transition-all duration-300" style={{ width: `${timelinePercent}%` }}></div>
-                <div className="absolute top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-amber-500 border-4 border-card shadow-lg shadow-amber-500/50 flex items-center justify-center cursor-pointer transition-all duration-300" style={{ left: `${timelinePercent}%` }}>
-                  <span className="text-[10px] font-black text-white">{contemplationMonth || 1}</span>
+          {/* LINHA DO TEMPO MINIMALISTA COM PREENCHIMENTO LARANJA */}
+          <div className="w-full mb-8">
+            <div className="relative py-6">
+              <div className="text-xs font-bold text-muted-foreground mb-3 uppercase tracking-wider">Evolução pelo Mês de Contemplação</div>
+              <div className="h-2 w-full bg-muted rounded-full relative">
+                {/* Progresso preenchido em laranja vibrante */}
+                <div className="absolute left-0 top-0 h-full bg-[#f39c12] rounded-full transition-all duration-300" style={{ width: `${timelinePercent}%` }}></div>
+                
+                {/* Ponto Extremo Esquerdo: 1º Mês */}
+                <div className="absolute -bottom-6 left-0 text-xs font-bold text-muted-foreground">
+                  1º Mês
+                </div>
+
+                {/* Indicador Dinâmico Móvel (Bolinha com o Mês atual) */}
+                <div className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-card border-[3px] border-[#f39c12] shadow-md flex items-center justify-center cursor-pointer transition-all duration-300" style={{ left: `${timelinePercent}%` }}>
+                  <span className="text-xs font-black text-foreground">{contemplationMonth || 1}</span>
+                </div>
+
+                {/* Ponto Extremo Direito: Prazo Total */}
+                <div className="absolute -bottom-6 right-0 text-xs font-bold text-muted-foreground">
+                  <span>{months || 220} Meses</span>
                 </div>
               </div>
-              {/* Rótulos do eixo */}
-              <div className="flex justify-between items-center mt-4 text-xs font-semibold text-muted-foreground">
-                <span>1º Mês</span>
-                <span className="text-amber-500 font-bold bg-amber-50 dark:bg-amber-900/30 px-3 py-1 rounded-full border border-amber-200 dark:border-amber-800">Mês Atual: <span className="font-extrabold">{contemplationMonth || 1}</span></span>
-                <span>{months || 220} Meses</span>
+              {/* Label Central de Status */}
+              <div className="flex justify-center mt-6">
+                <span className="text-[#f39c12] font-bold bg-amber-50 dark:bg-amber-900/30 px-4 py-1 rounded-full border border-amber-200 dark:border-amber-800 text-xs">
+                  Mês Atual: <span className="font-extrabold">{contemplationMonth || 1}</span>
+                </span>
               </div>
             </div>
           </div>

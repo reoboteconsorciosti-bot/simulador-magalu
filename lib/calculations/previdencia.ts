@@ -1,21 +1,6 @@
 import type { PrevidenciaAplicadaInput, PrevidenciaAplicadaResult } from '@/lib/types'
 import { calculateMonthlyInstallment } from './helpers'
-
-export function calcularCreditoPrevidencia(
-  credito: number,
-  prazo: number,
-  incc: number,
-  mesContemplacao: number
-): number {
-  let creditoReajustado = credito
-  const anosCompletos = Math.floor(mesContemplacao / 12)
-
-  for (let ano = 0; ano < anosCompletos; ano++) {
-    creditoReajustado = creditoReajustado * (1 + incc / 100)
-  }
-
-  return creditoReajustado
-}
+import { calculoCreditoContempladoPatrimonial } from './patrimonial-leverage'
 
 export function calcularValorCorrigidoPrevidencia(
   credito: number,
@@ -24,11 +9,10 @@ export function calcularValorCorrigidoPrevidencia(
   mesContemplacao: number,
   aplicacao: number
 ): number {
-  const creditoContemplado = calcularCreditoPrevidencia(
+  const creditoContemplado = calculoCreditoContempladoPatrimonial(
     credito,
-    prazo,
-    incc,
-    mesContemplacao
+    mesContemplacao,
+    incc
   )
   const prazoRestante = Math.max(0, prazo - mesContemplacao)
   let valorCorrigido = creditoContemplado
@@ -48,8 +32,8 @@ export function calculatePrevidenciaAplicada(
   // Monthly installment
   const parcelaCheia = calculateMonthlyInstallment(creditValue, months)
   
-  // Credit
-  const credit = calcularCreditoPrevidencia(creditValue, months, incc, currentMonth)
+  // Credit Contemplado (using the function from patrimonial-leverage)
+  const creditContemplado = calculoCreditoContempladoPatrimonial(creditValue, currentMonth, incc)
   
   // Valor Corrigido
   const valorCorrigido = calcularValorCorrigidoPrevidencia(
@@ -67,7 +51,8 @@ export function calculatePrevidenciaAplicada(
   const lucro = valorCorrigido - totalInvestido
   
   return {
-    credit,
+    credit: creditContemplado, // this can still be the same property name
+    creditContemplado, // add this explicitly for clarity
     valorCorrigido,
     parcelaCheia,
     parcelaPosContemplacao: 0,

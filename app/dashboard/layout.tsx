@@ -7,28 +7,25 @@ import { Button } from '@/components/ui/button'
 import { DrawingCanvas } from '@/components/drawing-canvas'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import {
-  LayoutDashboard,
   Calculator,
   FileText,
   TrendingUp,
   Building2,
-  Settings,
+  PiggyBank,
   Menu,
   X,
-  PiggyBank,
+  Moon,
+  Sun,
+  Wallet,
 } from 'lucide-react'
 import { useState } from 'react'
 
 const navigation = [
   { name: 'Nova Simulação', href: '/dashboard/simulacao', icon: Calculator },
-  { name: 'Alavancagem Financeira', href: '/dashboard/alavancagem-financeira', icon: TrendingUp },
-  { name: 'Alavancagem Patrimonial', href: '/dashboard/alavancagem-patrimonial', icon: Building2 },
-  { name: 'Previdência Aplicada', href: '/dashboard/previdencia-aplicada', icon: PiggyBank },
+  { name: 'Alavancagem Financeira', href: '/dashboard/alavancagem-financeira', icon: Wallet },
+  { name: 'Aquisição Patrimonial', href: '/dashboard/alavancagem-patrimonial', icon: Building2 },
+  { name: 'Aposentadoria', href: '/dashboard/aposentadoria', icon: PiggyBank },
   { name: 'Minhas Simulações', href: '/dashboard/simulacoes', icon: FileText },
-]
-
-const bottomNavigation = [
-  { name: 'Configurações', href: '/dashboard/configuracoes', icon: Settings },
 ]
 
 export default function DashboardLayout({
@@ -37,123 +34,97 @@ export default function DashboardLayout({
   children: React.ReactNode
 }) {
   const pathname = usePathname()
-  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Sidebar backdrop for mobile/tablet */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 z-40 bg-black/20 xl:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
-
-      {/* Sidebar */}
-      <aside
-        className={cn(
-          'fixed inset-y-0 left-0 z-50 w-64 bg-card border-r border-border text-foreground transform transition-transform duration-200 ease-in-out xl:translate-x-0 shadow-sm',
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        )}
-      >
-        <div className="flex h-full flex-col">
-          {/* Logo */}
-          <div className="flex items-center justify-between h-16 px-4 border-b border-border">
-            <Link href="/dashboard" className="flex items-center gap-2">
-              <img 
-                src="/images/LOGO-PRETA.png" 
-                alt="Reobote Consórcios"
-                className="w-24 h-auto dark:hidden"
-              />
-              <img 
-                src="/images/reobote_logo_final.png" 
-                alt="Reobote Consórcios"
-                className="w-48 h-auto hidden dark:block"
-              />
-            </Link>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="xl:hidden"
-              onClick={() => setSidebarOpen(false)}
-            >
-              <X className="h-5 w-5" />
-            </Button>
-          </div>
-
-          {/* Navigation */}
-          <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-            {navigation.map((item) => {
-              const isActive = pathname === item.href
-              return (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  onClick={() => setSidebarOpen(false)}
-                  className={cn(
-                    'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
-                    isActive
-                      ? 'bg-accent text-accent-foreground'
-                      : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
-                  )}
-                >
-                  <item.icon className="h-5 w-5" />
-                  {item.name}
-                </Link>
-              )
-            })}
-          </nav>
-
-          {/* Bottom navigation */}
-          <div className="px-3 py-4 border-t border-border space-y-1">
-            {bottomNavigation.map((item) => {
-              const isActive = pathname === item.href
-              return (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  onClick={() => setSidebarOpen(false)}
-                  className={cn(
-                    'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
-                    isActive
-                      ? 'bg-accent text-accent-foreground'
-                      : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
-                  )}
-                >
-                  <item.icon className="h-5 w-5" />
-                  {item.name}
-                </Link>
-              )
-            })}
-          </div>
-        </div>
-      </aside>
-
-      {/* Main content */}
-      <div className="xl:pl-64">
-        {/* Top bar */}
-        <header className="sticky top-0 z-30 h-16 bg-card border-b border-border flex items-center px-4 md:px-6 shadow-sm">
+    <div className="min-h-screen bg-background flex flex-col overflow-x-hidden">
+      {/* Header */}
+      <header className="sticky top-0 z-30 bg-card border-b border-border px-4 md:px-6 py-4 flex flex-wrap items-center justify-between gap-4 shadow-sm">
+        <div className="flex items-center gap-3">
+          {/* Mobile/Tablet menu button */}
           <Button
             variant="ghost"
             size="icon"
             className="xl:hidden"
-            onClick={() => setSidebarOpen(true)}
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
             <Menu className="h-5 w-5" />
           </Button>
-          <div className="flex-1" />
-          <div className="flex items-center gap-4">
-            <DrawingCanvas />
-            <ThemeToggle />
-            <div className="text-sm text-muted-foreground">
-              Reobote Consórcios - Sistema de Simulação
-            </div>
+          
+          {/* Logo */}
+          <div className="bg-gradient-to-tr from-blue-600 to-indigo-600 p-2.5 rounded-lg flex items-center justify-center text-white shadow-lg">
+            <TrendingUp className="h-5 w-5" />
           </div>
-        </header>
+          <div>
+            <span className="text-xs uppercase tracking-widest font-extrabold text-blue-600">SISTEMA INTEGRADO</span>
+            <h1 className="text-lg font-black tracking-tight flex items-center gap-1.5 text-foreground">
+              REOBOTE <span className="font-light text-muted-foreground">CONSÓRCIOS</span>
+            </h1>
+          </div>
+        </div>
 
-        {/* Page content */}
-        <main className="p-4 md:p-6 lg:p-8">{children}</main>
-      </div>
+        {/* Horizontal Menu (only visible on desktop/xl screens) */}
+        <nav className="hidden xl:flex flex-wrap justify-center items-center gap-2 bg-accent/50 p-1.5 rounded-xl border border-border shadow-inner">
+          {navigation.map((item) => {
+            const isActive = pathname === item.href;
+            return (
+              <Link
+                key={item.name}
+                href={item.href}
+                className={cn(
+                  "px-4 py-2.5 rounded-lg text-sm font-semibold transition-all duration-300 flex items-center gap-2",
+                  isActive
+                    ? "text-white bg-blue-600 shadow-md"
+                    : "text-muted-foreground hover:text-foreground hover:bg-background"
+                )}
+              >
+                <item.icon className="h-4 w-4" />
+                {item.name}
+              </Link>
+            );
+          })}
+        </nav>
+
+        {/* Right side controls - always on the far right */}
+        <div className="flex items-center gap-4 ml-auto">
+          <DrawingCanvas />
+          <ThemeToggle />
+          <div className="hidden xl:flex items-center gap-3 text-sm text-muted-foreground">
+            <span className="bg-accent px-3 py-1.5 rounded-full text-xs font-bold text-blue-600 border border-border">ONLINE</span>
+            <span>Reobote Consórcios</span>
+          </div>
+        </div>
+      </header>
+
+      {/* Mobile/Tablet dropdown menu */}
+      {mobileMenuOpen && (
+        <div className="bg-card border-b border-border px-4 py-3 xl:hidden">
+          <nav className="space-y-2">
+            {navigation.map((item) => {
+              const isActive = pathname === item.href;
+              return (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={cn(
+                    "flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors",
+                    isActive
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                  )}
+                >
+                  <item.icon className="h-5 w-5" />
+                  {item.name}
+                </Link>
+              );
+            })}
+          </nav>
+        </div>
+      )}
+
+      {/* Page content */}
+      <main className="flex-1 p-4 md:p-6 lg:p-8">{children}</main>
     </div>
   )
 }
