@@ -3,11 +3,13 @@
 import { useEffect, useRef, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 
 type DrawPoint = {
   x: number
   y: number
   isStart: boolean
+  isEraser: boolean
 }
 
 // Usamos localStorage para persistir os desenhos por rota
@@ -32,8 +34,10 @@ const saveDrawing = (pathname: string, points: DrawPoint[]) => {
 export function DrawingCanvas() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const isDrawingRef = useRef(false)
+  const isEraserModeRef = useRef(false)
   const [isOpen, setIsOpen] = useState(false)
   const [isClient, setIsClient] = useState(false)
+  const [isEraserActive, setIsEraserActive] = useState(false)
   const pathname = usePathname()
   const [drawPoints, setDrawPoints] = useState<DrawPoint[]>([])
 
@@ -119,43 +123,73 @@ export function DrawingCanvas() {
     context.clearRect(0, 0, canvas.width, canvas.height)
 
     if (drawPoints.length > 0) {
-      context.beginPath()
+      let lastWasEraser = false
       drawPoints.forEach((point, index) => {
         // Ajusta para a posição visível no canvas
         const x = point.x - currentScrollX
         const y = point.y - currentScrollY
-        
-        if (point.isStart) {
+
+        // Se mudou de modo, começa um novo caminho
+        if (point.isStart || point.isEraser !== lastWasEraser) {
+          if (index > 0) {
+            context.stroke()
+          }
+          context.beginPath()
+          
+          if (point.isEraser) {
+            context.globalCompositeOperation = 'destination-out'
+            context.lineWidth = 20
+          } else {
+            context.globalCompositeOperation = 'source-over'
+            context.lineWidth = 3
+            context.strokeStyle = '#ef4444'
+          }
           context.moveTo(x, y)
-        } else {
+        }
+        
+        if (!point.isStart) {
           context.lineTo(x, y)
         }
+        
+        lastWasEraser = point.isEraser
       })
       context.stroke()
+      context.globalCompositeOperation = 'source-over' // Resetar o modo
     }
   }
 
-  const startDrawing = (x: number, y: number) => {
+  const startDrawing = (x: number, y: number, isEraser: boolean) => {
     const context = getContext()
     if (!context) return
 
     isDrawingRef.current = true
+    isEraserModeRef.current = isEraser
+    setIsEraserActive(isEraser)
     const currentScrollX = window.scrollX
     const currentScrollY = window.scrollY
     
     const point: DrawPoint = {
       x: x,
       y: y,
-      isStart: true
+      isStart: true,
+      isEraser: isEraser
     }
     setDrawPoints(prev => [...prev, point])
     
     // Desenha na posição visível atual
+    if (isEraser) {
+      context.globalCompositeOperation = 'destination-out'
+      context.lineWidth = 20
+    } else {
+      context.globalCompositeOperation = 'source-over'
+      context.lineWidth = 3
+      context.strokeStyle = '#ef4444'
+    }
     context.beginPath()
     context.moveTo(x - currentScrollX, y - currentScrollY)
   }
 
-  const draw = (x: number, y: number) => {
+  const draw = (x: number, y: number, isEraser: boolean) => {
     if (!isDrawingRef.current) return
 
     const context = getContext()
@@ -167,17 +201,23 @@ export function DrawingCanvas() {
     const point: DrawPoint = {
       x: x,
       y: y,
-      isStart: false
+      isStart: false,
+      isEraser: isEraser
     }
     setDrawPoints(prev => [...prev, point])
     
     // Desenha na posição visível atual
+    if (isEraser) {
+      context.globalCompositeOperation = 'destination-out'
+      context.lineWidth = 20
+    }
     context.lineTo(x - currentScrollX, y - currentScrollY)
     context.stroke()
   }
 
   const stopDrawing = () => {
     isDrawingRef.current = false
+    setIsEraserActive(false)
   }
 
   const clearCanvas = () => {
@@ -212,9 +252,22 @@ export function DrawingCanvas() {
 
           <canvas
             ref={canvasRef}
-            className="fixed inset-0 block h-screen w-screen cursor-crosshair touch-none pointer-events-auto"
-            onPointerDown={(event) => startDrawing(event.pageX, event.pageY)}
-            onPointerMove={(event) => draw(event.pageX, event.pageY)}
+            className={cn(
+              "fixed inset-0 block h-screen w-screen touch-none pointer-events-auto",
+              isEraserActive ? "cursor-cell" : "cursor-crosshair"
+            )}
+            onContextMenu={(e) => e.preventDefault()}
+            onPointerDown={(event) => {
+              const isEraser = event.button === 2 // Botão direito
+              startDrawing(event.pageX, event.pageY, isEraser)
+            }}
+            onPointerMove={(event) => {
+              const isEraser = isEraserModeRef.current || event.buttons === 2
+              if (isEraser !== isEraserActive) {
+                setIsEraserActive(isEraser)
+              }
+              draw(event.pageX, event.pageY, isEraser)
+            }}
             onPointerUp={stopDrawing}
             onPointerLeave={stopDrawing}
           />
