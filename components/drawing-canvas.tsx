@@ -422,9 +422,27 @@ export function DrawingCanvas() {
 
   return (
     <>
-      <Button type="button" variant="outline" onClick={() => setIsOpen(true)}>
-        Desenhar
-      </Button>
+      {/* Botão FAB no canto inferior direito */}
+      <button
+        type="button"
+        onClick={() => setIsOpen(true)}
+        className="fixed bottom-6 right-6 z-40 w-14 h-14 rounded-full bg-blue-600 hover:bg-blue-700 shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center text-white group"
+        aria-label="Abrir ferramenta de desenho"
+      >
+        <svg 
+          className="w-7 h-7 transition-transform duration-300 group-hover:scale-110" 
+          fill="none" 
+          stroke="currentColor" 
+          viewBox="0 0 24 24"
+        >
+          <path 
+            strokeLinecap="round" 
+            strokeLinejoin="round" 
+            strokeWidth={2} 
+            d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" 
+          />
+        </svg>
+      </button>
 
       {isOpen && (
         <div className="fixed inset-0 z-[100] pointer-events-none">
