@@ -40,30 +40,30 @@ export default function AlavancagemFinanceiraPage() {
     return null
   }, [creditValue, months, incc, taxaTotal, saleGainPercent, installmentType, modality, contemplationMonth])
 
-  // Calculate timeline percentage
-  const timelinePercent = useMemo(() => {
-    if (months && months > 0 && contemplationMonth) {
-      return Math.max(0, Math.min(100, (contemplationMonth / months) * 100))
-    }
-    return 0
-  }, [contemplationMonth, months])
+  const syncFinSlider = (value: string) => {
+    setSharedField('contemplationMonth', parseFloat(value))
+  }
+
+  const syncFinInput = (value: string) => {
+    setSharedField('contemplationMonth', parseFloat(value))
+  }
 
   return (
-    <div className="min-h-screen text-foreground p-3 md:p-6">
+    <div className="min-h-screen bg-background text-foreground p-4 md:px-8 py-6 w-full max-w-full overflow-x-hidden">
       <main className="w-full space-y-6 max-w-full">
-        <div className="flex flex-wrap items-start justify-between gap-3 px-2">
-          <div>
-            <h2 className="text-2xl md:text-3xl font-black text-foreground tracking-tight">Simulação de Valorização Financeira</h2>
-            <p className="text-muted-foreground mt-1">Multiplique o seu patrimônio utilizando consórcio imobiliário de forma planejada.</p>
-          </div>
+        <div className="space-y-1.5">
+          <h2 className="text-[2rem] font-extrabold text-foreground tracking-tight">Resultados da Alavancagem Financeira</h2>
+          <p className="text-base text-muted-foreground">Analise seu ganho de capital rápido utilizando a estratégia de comercialização de cotas contempladas.</p>
         </div>
 
-        {/* ENTRADAS (INPUTS) COMPACTAS E HORIZONTAIS NO TOPO */}
-        <section className="bg-card rounded-2xl shadow-sm border border-border p-6 w-full">
-          <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-4">Dados da Operação (Altere os valores para simular)</h3>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 w-full">
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-bold text-muted-foreground">Crédito Original</label>
+        {/* Dados da Operação (Inputs) */}
+        <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
+          <span className="text-[11px] font-extrabold uppercase tracking-wider text-muted-foreground block mb-4">DADOS DA OPERAÇÃO (ALTERE OS VALORES PARA SIMULAR)</span>
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            
+            {/* Crédito Original */}
+            <div>
+              <label className="block text-sm font-bold text-muted-foreground mb-2">Crédito Original</label>
               <NumericFormat
                 value={creditValue}
                 onValueChange={(values) => setSharedField('creditValue', values.floatValue ?? null)}
@@ -73,23 +73,25 @@ export default function AlavancagemFinanceiraPage() {
                 decimalScale={2}
                 fixedDecimalScale
                 allowNegative={false}
-                className="w-full bg-background border border-border rounded-xl p-3 text-sm font-bold text-foreground focus:outline-none focus:border-primary transition-colors"
+                className="w-full bg-background border border-border rounded-lg px-3 py-3 text-sm font-semibold text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
               />
             </div>
 
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-bold text-muted-foreground">Prazo Total (Meses)</label>
+            {/* Prazo Total (Meses) */}
+            <div>
+              <label className="block text-sm font-bold text-muted-foreground mb-2">Prazo Total (Meses)</label>
               <NumericFormat
                 value={months}
                 onValueChange={(values) => setSharedField('months', values.floatValue ?? null)}
                 allowNegative={false}
                 decimalScale={0}
-                className="w-full bg-background border border-border rounded-xl p-3 text-sm font-bold text-foreground focus:outline-none focus:border-primary transition-colors"
+                className="w-full bg-background border border-border rounded-lg px-3 py-3 text-sm font-semibold text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
               />
             </div>
 
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-bold text-muted-foreground">Ganho Venda (%)</label>
+            {/* Ganho Venda (%) */}
+            <div>
+              <label className="block text-sm font-bold text-muted-foreground mb-2">Ganho Venda (%)</label>
               <NumericFormat
                 value={saleGainPercent}
                 onValueChange={(values) => setSaleGainPercent(values.floatValue ?? null)}
@@ -97,163 +99,181 @@ export default function AlavancagemFinanceiraPage() {
                 suffix="%"
                 decimalScale={2}
                 allowNegative={false}
-                className="w-full bg-background border border-border rounded-xl p-3 text-sm font-bold text-foreground focus:outline-none focus:border-primary transition-colors"
+                className="w-full bg-background border border-border rounded-lg px-3 py-3 text-sm font-semibold text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
               />
             </div>
 
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-bold text-muted-foreground">Parcela</label>
+            {/* Parcela */}
+            <div>
+              <label className="block text-sm font-bold text-muted-foreground mb-2">Parcela</label>
               <select 
                 value={installmentType} 
                 onChange={(e) => setInstallmentType(e.target.value)}
-                className="w-full bg-background border border-border rounded-xl p-3 text-sm font-bold text-foreground focus:outline-none focus:border-primary transition-colors"
+                className="w-full bg-background border border-border rounded-lg px-3 py-3 text-sm font-semibold text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
               >
-                <option value="Meia">Meia</option>
-                <option value="Cheia">Cheia</option>
+                <option value="Meia">Meia Parcela</option>
+                <option value="Cheia">Parcela Cheia</option>
               </select>
             </div>
 
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-bold text-muted-foreground">Modalidade</label>
+            {/* Modalidade */}
+            <div>
+              <label className="block text-sm font-bold text-muted-foreground mb-2">Modalidade</label>
               <select 
                 value={modality} 
                 onChange={(e) => setModality(e.target.value)}
-                className="w-full bg-background border border-border rounded-xl p-3 text-sm font-bold text-foreground focus:outline-none focus:border-primary transition-colors"
+                className="w-full bg-background border border-border rounded-lg px-3 py-3 text-sm font-semibold text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
               >
                 <option value="Sorteio">Sorteio</option>
                 <option value="Lance Fixo">Lance</option>
               </select>
             </div>
 
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-bold text-muted-foreground">Mês Contemplação</label>
+            {/* Mês Contemplação */}
+            <div>
+              <label className="block text-sm font-bold text-muted-foreground mb-2">Mês Contemplação</label>
               <NumericFormat
                 value={contemplationMonth}
-                onValueChange={(values) => setSharedField('contemplationMonth', values.floatValue ?? null)}
+                onValueChange={(values) => syncFinSlider(values.floatValue?.toString() ?? '1')}
                 allowNegative={false}
                 decimalScale={0}
                 min={1}
                 max={months || 220}
-                className="w-full bg-background border border-border rounded-xl p-3 text-sm font-bold text-foreground focus:outline-none focus:border-primary transition-colors"
+                className="w-full bg-background border border-border rounded-lg px-3 py-3 text-sm font-semibold text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
               />
             </div>
           </div>
-        </section>
+        </div>
 
-        {/* RESULTADOS DA ALAVANCAGEM FINANCEIRA EMBAIXO COM MÁXIMA LARGURA */}
-        <section className="bg-card rounded-3xl shadow-sm border border-border p-4 md:p-8 space-y-6 w-full max-w-full">
-          <div className="flex items-center justify-between border-b border-border pb-4">
-            <h3 className="text-lg font-extrabold tracking-tight text-foreground">Resultados da Alavancagem Financeira</h3>
-            <span className="text-xs font-bold text-primary bg-primary/10 px-3 py-1.5 rounded-full uppercase tracking-wider">Cálculos Automatizados</span>
+        {/* Resultados */}
+        <div className="bg-card border border-border rounded-2xl p-6 shadow-sm space-y-6">
+          <div className="flex justify-between items-center border-b border-border pb-4">
+            <h3 className="text-xl font-extrabold text-foreground">Resultados da Alavancagem Financeira</h3>
+            <span className="text-[11px] font-bold text-primary bg-primary/10 border border-primary/20 px-4 py-1.5 rounded-full uppercase tracking-wider">CÁLCULOS AUTOMATIZADOS</span>
           </div>
 
-          {/* LINHA DO TEMPO MINIMALISTA COM PREENCHIMENTO LARANJA */}
-          <div className="w-full mb-8">
-            <div className="relative py-6">
-              <div className="text-xs font-bold text-muted-foreground mb-3 uppercase tracking-wider">Evolução pelo Mês de Contemplação</div>
-              <div className="h-2 w-full bg-muted rounded-full relative">
-                {/* Progresso preenchido em laranja vibrante */}
-                <div className="absolute left-0 top-0 h-full bg-[#f39c12] rounded-full transition-all duration-300" style={{ width: `${timelinePercent}%` }}></div>
+          {/* Slider / Linha do Tempo */}
+          <div className="space-y-4">
+            <span className="text-[11px] font-extrabold text-muted-foreground tracking-wider block uppercase">EVOLUÇÃO PELO MÊS DE CONTEMPLAÇÃO</span>
+            <div className="relative pt-6 pb-2 px-2">
+              {/* Custom slider track */}
+              <div className="w-full h-2 bg-muted rounded-lg relative">
+                {/* Filled portion */}
+                <div 
+                  className="absolute h-full bg-[#f59e0b] rounded-lg transition-all duration-300 ease-out"
+                  style={{ width: `${((contemplationMonth || 1) / (months || 220)) * 100}%` }}
+                />
+
+                {/* Custom thumb with number */}
+                <div 
+                  className="absolute top-1/2 transform -translate-x-1/2 -translate-y-1/2 flex flex-col items-center transition-all duration-300 ease-out z-10" 
+                  style={{ left: `${((contemplationMonth || 1) / (months || 220)) * 100}%` }}
+                >
+                  <div className="relative w-11 h-11 rounded-full flex items-center justify-center shadow-md border-2 border-[#f59e0b] font-sans">
+                    <div className="absolute inset-[2px] rounded-full bg-card" />
+                    <span className="relative z-10 text-slate-950 dark:text-white font-bold text-sm">{contemplationMonth || 1}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Hidden range input for interaction */}
+              <input 
+                type="range" 
+                min="1" 
+                max={months || 220} 
+                value={contemplationMonth || 1} 
+                onInput={(e: React.InputEvent<HTMLInputElement>) => syncFinInput((e.target as HTMLInputElement).value)} 
+                className="absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer z-20"
+              />
+
+              <div className="flex justify-between text-[11px] font-bold text-muted-foreground mt-8">
+                <span>1º Mês</span>
+                <span>{months || 220} Meses</span>
+              </div>
+            </div>
+            <div className="flex justify-center">
+              <span className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-300 text-[11px] font-extrabold px-4 py-1.5 rounded-full uppercase tracking-wider">Mês Atual: {contemplationMonth || 1}</span>
+            </div>
+          </div>
+
+          <div className="flex flex-col xl:flex-row gap-6 items-start">
+            {/* Esquerda: Cartões de Destaque */}
+            <div className="flex-1 space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 
-                {/* Ponto Extremo Esquerdo: 1º Mês */}
-                <div className="absolute -bottom-6 left-0 text-xs font-bold text-muted-foreground">
-                  1º Mês
+                {/* Crédito Original */}
+                <div className="bg-card border border-border border-l-[5px] border-l-primary rounded-xl p-5 shadow-sm hover:shadow-md transition-all flex justify-between items-center font-sans">
+                  <div>
+                    <span className="text-[9px] font-extrabold text-muted-foreground uppercase tracking-widest block">CRÉDITO ORIGINAL</span>
+                    <div className="text-xl font-black text-foreground mt-1">{formatCurrency(results?.creditValueOriginal || 0)}</div>
+                  </div>
+                  <div className="p-2.5 rounded-full flex items-center justify-center">
+                    <img src="/icons/mão.png" alt="Mão" className="w-15 h-15 object-contain" />
+                  </div>
                 </div>
 
-                {/* Indicador Dinâmico Móvel (Bolinha com o Mês atual) */}
-                <div className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-card border-[3px] border-[#f39c12] shadow-md flex items-center justify-center cursor-pointer transition-all duration-300" style={{ left: `${timelinePercent}%` }}>
-                  <span className="text-xs font-black text-foreground">{contemplationMonth || 1}</span>
+                {/* Crédito com INCC */}
+                <div className="bg-card border border-border border-l-[5px] border-l-primary rounded-xl p-5 shadow-sm hover:shadow-md transition-all flex justify-between items-center font-sans">
+                  <div>
+                    <span className="text-[9px] font-extrabold text-muted-foreground uppercase tracking-widest block">CRÉDITO COM INCC</span>
+                    <div className="text-xl font-black text-foreground mt-1">{formatCurrency(results?.creditValueWithIncc || 0)}</div>
+                  </div>
+                  <div className="p-2.5 rounded-full flex items-center justify-center">
+                    <img src="/icons/CASA.png" alt="casa" className="w-15 h-15 object-contain" />
+                  </div>
                 </div>
 
-                {/* Ponto Extremo Direito: Prazo Total */}
-                <div className="absolute -bottom-6 right-0 text-xs font-bold text-muted-foreground">
-                  <span>{months || 220} Meses</span>
+                {/* Total Investido */}
+                <div className="bg-card border border-border border-l-[5px] border-l-[#f59e0b] rounded-xl p-5 shadow-sm hover:shadow-md transition-all flex justify-between items-center font-sans">
+                  <div>
+                    <span className="text-[9px] font-extrabold text-muted-foreground uppercase tracking-widest block">TOTAL INVESTIDO</span>
+                    <div className="text-xl font-black text-foreground mt-1">{formatCurrency(results?.totalInvested || 0)}</div>
+                  </div>
+                  <div className="p-2.5 rounded-full flex items-center justify-center">
+                    <img src="/icons/Vector Smart Object.png" alt="Vector Smart Object" className="w-20 h-20 object-contain" />
+                  </div>
+                </div>
+
+                {/* Valor da Venda */}
+                <div className="bg-card border border-border border-l-[5px] border-l-[#f59e0b] rounded-xl p-5 shadow-sm hover:shadow-md transition-all flex justify-between items-center font-sans">
+                  <div>
+                    <span className="text-[9px] font-extrabold text-muted-foreground uppercase tracking-widest block">VALOR DA VENDA</span>
+                    <div className="text-xl font-black text-foreground mt-1">{formatCurrency(results?.saleValue || 0)}</div>
+                  </div>
+                  <div className="p-2.5 rounded-full flex items-center justify-center">
+                    <img src="/icons/MOEDA.png" alt="Moeda" className="w-15 h-15 object-contain" />
+                  </div>
                 </div>
               </div>
-              {/* Label Central de Status */}
-              <div className="flex justify-center mt-6">
-                <span className="text-[#f39c12] font-bold bg-amber-50 dark:bg-amber-900/30 px-4 py-1 rounded-full border border-amber-200 dark:border-amber-800 text-xs">
-                  Mês Atual: <span className="font-extrabold">{contemplationMonth || 1}</span>
-                </span>
+
+              {/* Lucro Liquido amplo */}
+              <div className="bg-card border border-border border-l-[5px] border-l-emerald-500 rounded-xl p-5 shadow-sm hover:shadow-md transition-all flex justify-between items-center font-sans">
+                <div>
+                  <span className="text-[9px] font-extrabold text-emerald-500 dark:text-emerald-400 uppercase tracking-widest block">LUCRO LÍQUIDO NA VENDA</span>
+                  <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-1">{formatCurrency(results?.profit || 0)}</div>
+                </div>
+                <div className="p-3 rounded-full flex items-center justify-center shadow-inner">
+                  <img src="/icons/MOEDA.png" alt="Moeda" className="w-15 h-15 object-contain" />
+                </div>
+              </div>
+            </div>
+
+            {/* Direita: Círculos Dourados Premium (ROI / RENTABILIDADE) */}
+            <div className="w-full lg:w-48 flex flex-row lg:flex-col justify-center items-center gap-4 lg:py-4">
+              {/* Círculo ROI */}
+              <div className="bg-gradient-to-br from-[#ffeaa7] via-[#d4af37] to-[#d4af37] border-4 border-card rounded-full w-32 h-32 md:w-36 md:h-36 flex flex-col justify-center items-center text-black select-none transform hover:scale-105 transition-all shadow-xl font-sans">
+                <div className="text-lg md:text-xl font-black tracking-tighter drop-shadow-md">{results ? `${results.roi.toFixed(2).replace('.', ',')}%` : '0,00%'}</div>
+                <div className="text-[8px] md:text-[9px] font-bold uppercase tracking-wider mt-0.5 drop-shadow-sm">ROI</div>
+              </div>
+
+              {/* Círculo RENTABILIDA */}
+              <div className="bg-gradient-to-br from-[#ffeaa7] via-[#d4af37] to-[#d4af37] border-4 border-card rounded-full w-32 h-32 md:w-36 md:h-36 flex flex-col justify-center items-center text-black select-none transform hover:scale-105 transition-all shadow-xl font-sans">
+                <div className="text-lg md:text-xl font-black tracking-tighter drop-shadow-md">{results ? `${results.monthlyReturn.toFixed(2).replace('.', ',')}%` : '0,00%'}</div>
+                <div className="text-[8px] md:text-[9px] font-bold uppercase tracking-wider mt-0.5 drop-shadow-sm">RENT. MÊS</div>
               </div>
             </div>
           </div>
-
-          {/* Grid Responsiva com os Cartões de Saída à Esquerda e Círculos Dourados à Direita */}
-          <div className="flex flex-col lg:flex-row items-stretch gap-6 w-full overflow-hidden">
-            
-            {/* Coluna de Cartões (Estilo clássico border-l-4 para não quebrar em notebooks/tablets) */}
-            <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
-              
-              {/* Crédito Original (Borda Azul) */}
-              <div className="bg-card border border-border rounded-xl p-5 shadow-sm border-l-4 border-l-primary transition-all hover:shadow-md min-w-0">
-                <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider block mb-1">Crédito Original</span>
-                <span className="text-xl md:text-2xl lg:text-3xl font-black text-foreground tracking-tight block break-all">
-                  {formatCurrency(results?.creditValueOriginal || 0)}
-                </span>
-              </div>
-
-              {/* Crédito com INCC (Borda Azul) */}
-              <div className="bg-card border border-border rounded-xl p-5 shadow-sm border-l-4 border-l-primary transition-all hover:shadow-md min-w-0">
-                <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider block mb-1">Crédito com INCC</span>
-                <span className="text-xl md:text-2xl lg:text-3xl font-black text-foreground tracking-tight block break-all">
-                  {formatCurrency(results?.creditValueWithIncc || 0)}
-                </span>
-              </div>
-
-              {/* Total Investido (Borda Amarela) */}
-              <div className="bg-card border border-border rounded-xl p-5 shadow-sm border-l-4 border-l-amber-500 transition-all hover:shadow-md min-w-0">
-                <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider block mb-1">Total Investido</span>
-                <span className="text-xl md:text-2xl lg:text-3xl font-black text-foreground tracking-tight block break-all">
-                  {formatCurrency(results?.totalInvested || 0)}
-                </span>
-              </div>
-
-              {/* Valor da Venda (Borda Amarela) */}
-              <div className="bg-card border border-border rounded-xl p-5 shadow-sm border-l-4 border-l-amber-500 transition-all hover:shadow-md min-w-0">
-                <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider block mb-1">Valor da Venda</span>
-                <span className="text-xl md:text-2xl lg:text-3xl font-black text-foreground tracking-tight block break-all">
-                  {formatCurrency(results?.saleValue || 0)}
-                </span>
-              </div>
-
-              {/* Lucro Líquido na Venda (Borda Verde - Ocupa as 2 colunas no desktop) */}
-              <div className="bg-card border border-border rounded-xl p-5 shadow-sm border-l-4 border-l-emerald-500 md:col-span-2 transition-all hover:shadow-md min-w-0">
-                <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider block mb-1">Lucro Líquido na Venda</span>
-                <span className="text-2xl md:text-3xl lg:text-4xl font-black text-emerald-600 dark:text-emerald-400 tracking-tight block break-all">
-                  {formatCurrency(results?.profit || 0)}
-                </span>
-              </div>
-
-            </div>
-
-            {/* Coluna dos Círculos Dourados (Stacked Verticalmente) */}
-            <div className="w-full lg:w-[180px] flex flex-row lg:flex-col justify-center items-center gap-6 py-4 lg:py-0 border-t lg:border-t-0 lg:border-l border-border">
-              
-              {/* Golden Circle 1: ROI */}
-              <div className="flex flex-col items-center">
-                <div className="w-28 h-28 lg:w-32 lg:h-32 rounded-full bg-gradient-to-b from-[#ffeaa7] to-[#d4af37] border-4 border-card shadow-xl flex flex-col items-center justify-center text-center transition-transform hover:scale-105">
-                  <span className="text-lg lg:text-xl font-extrabold text-black drop-shadow-md">
-                    {results ? `${results.roi.toFixed(2).replace('.', ',')}%` : '0,00%'}
-                  </span>
-                  <span className="text-[9px] font-bold text-black uppercase tracking-wider mt-0.5 drop-shadow-sm">ROI</span>
-                </div>
-              </div>
-
-              {/* Golden Circle 2: Rentabilidade ao Mês */}
-              <div className="flex flex-col items-center">
-                <div className="w-28 h-28 lg:w-32 lg:h-32 rounded-full bg-gradient-to-b from-[#ffeaa7] to-[#d4af37] border-4 border-card shadow-xl flex flex-col items-center justify-center text-center transition-transform hover:scale-105">
-                  <span className="text-lg lg:text-xl font-extrabold text-black drop-shadow-md">
-                    {results ? `${results.monthlyReturn.toFixed(2).replace('.', ',')}%` : '0,00%'}
-                  </span>
-                  <span className="text-[9px] font-bold text-black uppercase tracking-wider mt-0.5 drop-shadow-sm">Rent. Mês</span>
-                </div>
-              </div>
-
-            </div>
-
-          </div>
-        </section>
+        </div>
       </main>
     </div>
   )

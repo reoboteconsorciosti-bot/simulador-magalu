@@ -70,7 +70,6 @@ export function DrawingCanvas() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const isDrawingRef = useRef(false)
   const isEraserModeRef = useRef(false)
-  const wasEraserModeRef = useRef(false)
   const [isOpen, setIsOpen] = useState(false)
   const [isClient, setIsClient] = useState(false)
   const pathname = usePathname()
@@ -248,24 +247,19 @@ export function DrawingCanvas() {
     return false
   }
 
-  const startDrawing = (x: number, y: number, isEraser: boolean, pressure?: number, tiltX?: number, tiltY?: number) => {
-    const context = getContext()
-    if (!context) return
+  const checkEraserButton = (event: PointerEvent | React.PointerEvent): boolean => {
+    // Verifica todos os bits possíveis para botão lateral da S Pen (compatibilidade máxima)
+    // Bit 5 (32) é o botão erazer/lateral padrão
+    // Alguns dispositivos usam bit 1 (2) ou combinações
+    const isEraserPressed = 
+      (event.buttons & 32) !== 0 || 
+      event.buttons === 32 ||
+      (event.buttons & 0x20) !== 0
+    
+    return isEraserPressed
+  }
 
-    isDrawingRef.current = true
-    isEraserModeRef.current = isEraser
-    wasEraserModeRef.current = isEraser
-    setIsEraserActive(isEraser)
-    
-    const currentScrollX = window.scrollX
-    const currentScrollY = window.scrollY
-    const strokeId = crypto.randomUUID()
-    setCurrentStrokeId(strokeId)
-    
-    const point: DrawPoint = { x, y, isStart: true, pressure, tiltX, tiltY }
-    setStrokes(prev => [...prev, { id: strokeId, points: [point] }])
-    
-    // Desenha na posição visível atual
+  const applyCanvasMode = (context: CanvasRenderingContext2D, isEraser: boolean) => {
     context.lineCap = 'round'
     context.lineJoin = 'round'
     
@@ -277,12 +271,56 @@ export function DrawingCanvas() {
       context.lineWidth = 4
       context.strokeStyle = '#ef4444'
     }
-    context.beginPath()
-    context.moveTo(x - currentScrollX, y - currentScrollY)
   }
 
-  const draw = (x: number, y: number, isEraser: boolean, pressure?: number, tiltX?: number, tiltY?: number) => {
+  const startDrawing = (event: React.PointerEvent) => {
+    if (event.button === 2) return // Botão direito é para apagar traço completo
+
+    const isEraser = checkEraserButton(event)
+    isEraserModeRef.current = isEraser
+    setIsEraserActive(isEraser)
+    isDrawingRef.current = true
+
+    console.log('[S Pen] Iniciando desenho', {
+      pointerType: event.pointerType,
+      buttons: event.buttons,
+      isEraser
+    })
+
+    const context = getContext()
+    if (!context) return
+
+    const currentScrollX = window.scrollX
+    const currentScrollY = window.scrollY
+    const strokeId = crypto.randomUUID()
+    setCurrentStrokeId(strokeId)
+    
+    const point: DrawPoint = { 
+      x: event.pageX, 
+      y: event.pageY, 
+      isStart: true, 
+      pressure: event.pressure,
+      tiltX: event.tiltX,
+      tiltY: event.tiltY
+    }
+    setStrokes(prev => [...prev, { id: strokeId, points: [point] }])
+    
+    // Inicializar canvas
+    applyCanvasMode(context, isEraser)
+    context.beginPath()
+    context.moveTo(event.pageX - currentScrollX, event.pageY - currentScrollY)
+  }
+
+  const continueDrawing = (event: React.PointerEvent) => {
     if (!isDrawingRef.current || !currentStrokeId) return
+
+    const isEraser = checkEraserButton(event)
+    
+    // Atualizar estado visual do modo
+    if (isEraser !== isEraserModeRef.current) {
+      isEraserModeRef.current = isEraser
+      setIsEraserActive(isEraser)
+    }
 
     const context = getContext()
     if (!context) return
@@ -290,24 +328,33 @@ export function DrawingCanvas() {
     const currentScrollX = window.scrollX
     const currentScrollY = window.scrollY
     
-    const point: DrawPoint = { x, y, isStart: false, pressure, tiltX, tiltY }
+    const point: DrawPoint = { 
+      x: event.pageX, 
+      y: event.pageY, 
+      isStart: false, 
+      pressure: event.pressure,
+      tiltX: event.tiltX,
+      tiltY: event.tiltY
+    }
     setStrokes(prev => prev.map(s => 
       s.id === currentStrokeId ? { ...s, points: [...s.points, point] } : s
     ))
     
-    // Desenha na posição visível atual
-    if (isEraser) {
-      context.globalCompositeOperation = 'destination-out'
-      context.lineWidth = 30
-    }
-    context.lineTo(x - currentScrollX, y - currentScrollY)
+    // Aplicar modo correto e continuar desenhando
+    applyCanvasMode(context, isEraser)
+    context.lineTo(event.pageX - currentScrollX, event.pageY - currentScrollY)
     context.stroke()
+
+    console.log('[S Pen] Desenhando', {
+      isEraser,
+      x: event.pageX,
+      y: event.pageY
+    })
   }
 
   const stopDrawing = () => {
     isDrawingRef.current = false
     setCurrentStrokeId(null)
-    // Não resetar isEraserActive imediatamente para manter feedback visual até próximo evento
   }
 
   const clearCanvas = () => {
@@ -317,103 +364,6 @@ export function DrawingCanvas() {
     if (!current || !context) return
 
     context.clearRect(0, 0, current.width, current.height)
-  }
-
-  const handlePointerDown = (event: React.PointerEvent) => {
-    if (event.button === 2) return // Botão direito é para apagar traço completo no onContextMenu
-
-    // Detectar se o botão lateral da S Pen está pressionado (bit 5 é o botão lateral/erazer)
-    // Ou buttons === 32 para alguns dispositivos
-    const isEraserButtonPressed = (event.buttons & 32) !== 0 || event.buttons === 32
-
-    console.log('[S Pen Debug]', {
-      pointerType: event.pointerType,
-      buttons: event.buttons,
-      button: event.button,
-      pressure: event.pressure,
-      tiltX: event.tiltX,
-      tiltY: event.tiltY,
-      isEraser: isEraserButtonPressed
-    })
-
-    startDrawing(
-      event.pageX, 
-      event.pageY, 
-      isEraserButtonPressed,
-      event.pressure,
-      event.tiltX,
-      event.tiltY
-    )
-  }
-
-  const handlePointerMove = (event: React.PointerEvent) => {
-    if (!isDrawingRef.current || !currentStrokeId) return
-
-    // Verificar mudança no estado do botão lateral
-    const isEraserButtonPressed = (event.buttons & 32) !== 0 || event.buttons === 32
-    const currentIsEraser = isEraserModeRef.current
-
-    console.log('[S Pen Debug Move]', {
-      pointerType: event.pointerType,
-      buttons: event.buttons,
-      isEraserButtonPressed,
-      currentIsEraser,
-      mode: isEraserButtonPressed ? 'BORRACHA' : 'DESENHO'
-    })
-
-    if (isEraserButtonPressed !== currentIsEraser) {
-      // Modo mudou! Finalizar o traço atual e começar um novo com o modo correto
-      const context = getContext()
-      if (context) {
-        context.stroke() // Finalizar o traço atual
-      }
-      isEraserModeRef.current = isEraserButtonPressed
-      setIsEraserActive(isEraserButtonPressed)
-      
-      // Iniciar novo traço do ponto atual
-      const strokeId = crypto.randomUUID()
-      setCurrentStrokeId(strokeId)
-      
-      const point: DrawPoint = { 
-        x: event.pageX, 
-        y: event.pageY, 
-        isStart: true, 
-        pressure: event.pressure,
-        tiltX: event.tiltX,
-        tiltY: event.tiltY
-      }
-      setStrokes(prev => [...prev, { id: strokeId, points: [point] }])
-      
-      const currentScrollX = window.scrollX
-      const currentScrollY = window.scrollY
-      
-      const ctx = getContext()
-      if (ctx) {
-        ctx.lineCap = 'round'
-        ctx.lineJoin = 'round'
-        
-        if (isEraserButtonPressed) {
-          ctx.globalCompositeOperation = 'destination-out'
-          ctx.lineWidth = 30
-        } else {
-          ctx.globalCompositeOperation = 'source-over'
-          ctx.lineWidth = 4
-          ctx.strokeStyle = '#ef4444'
-        }
-        ctx.beginPath()
-        ctx.moveTo(event.pageX - currentScrollX, event.pageY - currentScrollY)
-      }
-    } else {
-      // Continuar no mesmo modo
-      draw(
-        event.pageX, 
-        event.pageY, 
-        isEraserButtonPressed,
-        event.pressure,
-        event.tiltX,
-        event.tiltY
-      )
-    }
   }
 
   if (!isClient) {
@@ -465,8 +415,8 @@ export function DrawingCanvas() {
               e.preventDefault()
               deleteStrokeAtPoint(e.pageX, e.pageY)
             }}
-            onPointerDown={handlePointerDown}
-            onPointerMove={handlePointerMove}
+            onPointerDown={startDrawing}
+            onPointerMove={continueDrawing}
             onPointerUp={stopDrawing}
             onPointerLeave={stopDrawing}
           />
