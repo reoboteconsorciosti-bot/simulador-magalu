@@ -145,6 +145,21 @@ export function DrawingCanvas() {
 
   useEffect(() => {
     if (!isOpen || !isClient) return
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const preventDefaultForPen = (e: PointerEvent) => {
+      if (e.pointerType === 'pen') e.preventDefault()
+    }
+    canvas.addEventListener('pointerdown', preventDefaultForPen, { passive: false })
+    canvas.addEventListener('pointermove', preventDefaultForPen, { passive: false })
+    return () => {
+      canvas.removeEventListener('pointerdown', preventDefaultForPen)
+      canvas.removeEventListener('pointermove', preventDefaultForPen)
+    }
+  }, [isOpen, isClient])
+
+  useEffect(() => {
+    if (!isOpen || !isClient) return
     const handleScroll = () => redrawCanvas()
     window.addEventListener('scroll', handleScroll, { passive: true })
     return () => window.removeEventListener('scroll', handleScroll)
@@ -233,7 +248,6 @@ export function DrawingCanvas() {
 
   const startDrawing = (event: React.PointerEvent) => {
     if (event.pointerType === 'touch') return
-    if (event.pointerType === 'pen') event.preventDefault()
     canvasRef.current?.setPointerCapture(event.pointerId)
     if (event.button === 2) return
     const isEraser = checkEraserButton(event)
@@ -307,7 +321,7 @@ export function DrawingCanvas() {
         <div className="fixed inset-0 z-[100] pointer-events-none">
           <canvas
             ref={canvasRef}
-            className={cn('fixed inset-0 block h-screen w-screen touch-none pointer-events-auto', activeCursor)}
+            className={cn('fixed inset-0 block h-screen w-screen pointer-events-auto', activeCursor)}
             onContextMenu={e => { e.preventDefault(); deleteStrokeAtPoint(e.pageX, e.pageY) }}
             onPointerDown={startDrawing}
             onPointerMove={continueDrawing}
