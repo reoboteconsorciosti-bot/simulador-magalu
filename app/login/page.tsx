@@ -62,9 +62,8 @@ export default function LoginPage() {
             alt="Reobote Consórcios"
             width={220}
             height={80}
-            className="h-16 w-auto object-contain dark:invert mb-2"
+            className="h-25 w-auto object-contain mb-2"
           />
-          <p className="text-sm text-muted-foreground">Simulador Magalu</p>
         </div>
 
         {/* Card */}
