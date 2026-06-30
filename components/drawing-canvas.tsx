@@ -252,6 +252,7 @@ export function DrawingCanvas() {
   const startDrawing = (event: React.PointerEvent) => {
     if (event.pointerType !== 'pen') return
     event.preventDefault()
+    canvasRef.current?.setPointerCapture(event.pointerId)
     if (event.button === 2) return
     const isEraser = checkEraserButton(event)
     isEraserModeRef.current = isEraser
@@ -324,11 +325,12 @@ export function DrawingCanvas() {
         <div className="fixed inset-0 z-[100] pointer-events-none">
           <canvas
             ref={canvasRef}
-            className={cn('fixed inset-0 block h-screen w-screen pointer-events-auto', activeCursor)}
+            className={cn('fixed inset-0 block h-screen w-screen touch-none pointer-events-auto', activeCursor)}
             onContextMenu={e => { e.preventDefault(); deleteStrokeAtPoint(e.pageX, e.pageY) }}
             onPointerDown={startDrawing}
             onPointerMove={continueDrawing}
             onPointerUp={stopDrawing}
+            onPointerCancel={stopDrawing}
             onPointerLeave={stopDrawing}
           />
         </div>
