@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { usePathname } from 'next/navigation'
-import { Button } from '@/components/ui/button'
+import { X, Trash2, Highlighter, SlidersHorizontal } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 type DrawPoint = {
@@ -17,10 +17,37 @@ type DrawPoint = {
 type Stroke = {
   id: string
   points: DrawPoint[]
-  isEraser?: boolean // Manter compatibilidade com dados antigos
+  isEraser?: boolean
+  color: string
+  width: number
+  isHighlighter: boolean
 }
 
-// Usamos localStorage para persistir os desenhos por rota
+type StrokeMode = {
+  color: string
+  width: number
+  isHighlighter: boolean
+  isEraser: boolean
+}
+
+const COLORS = [
+  '#ef4444', // vermelho
+  '#f97316', // laranja
+  '#eab308', // amarelo
+  '#22c55e', // verde
+  '#3b82f6', // azul
+  '#8b5cf6', // roxo
+  '#ec4899', // rosa
+  '#0f172a', // preto
+]
+
+const WIDTHS = [
+  { value: 2,  visual: 1.5 },
+  { value: 4,  visual: 3   },
+  { value: 8,  visual: 6   },
+  { value: 16, visual: 10  },
+]
+
 const STORAGE_KEY = 'drawing-canvas-by-page'
 
 const getSavedDrawings = (): Record<string, Stroke[]> => {
@@ -29,28 +56,32 @@ const getSavedDrawings = (): Record<string, Stroke[]> => {
     const saved = localStorage.getItem(STORAGE_KEY)
     if (!saved) return {}
     const data = JSON.parse(saved)
-    // Converter dados antigos (array de DrawPoint) para novo formato (array de Stroke)
     const converted: Record<string, Stroke[]> = {}
     for (const [path, value] of Object.entries(data)) {
       if (Array.isArray(value)) {
         if (value.length > 0 && 'x' in value[0]) {
-          // Dados antigos: agrupar em traços
-          const strokes: Stroke[] = []
-          let currentStroke: DrawPoint[] = []
+          // Formato antigo: array de pontos
+          const strokesArr: Stroke[] = []
+          let current: DrawPoint[] = []
           for (const point of value) {
-            if ((point as any).isStart && currentStroke.length > 0) {
-              strokes.push({ id: crypto.randomUUID(), points: [...currentStroke] })
-              currentStroke = []
+            if ((point as any).isStart && current.length > 0) {
+              strokesArr.push({ id: crypto.randomUUID(), points: [...current], color: '#ef4444', width: 4, isHighlighter: false })
+              current = []
             }
-            currentStroke.push(point)
+            current.push(point)
           }
-          if (currentStroke.length > 0) {
-            strokes.push({ id: crypto.randomUUID(), points: currentStroke })
+          if (current.length > 0) {
+            strokesArr.push({ id: crypto.randomUUID(), points: current, color: '#ef4444', width: 4, isHighlighter: false })
           }
-          converted[path] = strokes
+          converted[path] = strokesArr
         } else {
-          // Já está no novo formato
-          converted[path] = value as Stroke[]
+          // Formato novo: pode estar faltando campos
+          converted[path] = (value as any[]).map(s => ({
+            ...s,
+            color: s.color ?? '#ef4444',
+            width: s.width ?? 4,
+            isHighlighter: s.isHighlighter ?? false,
+          }))
         }
       }
     }
@@ -70,6 +101,10 @@ export function DrawingCanvas() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const isDrawingRef = useRef(false)
   const isEraserModeRef = useRef(false)
+  const currentStrokeModeRef = useRef<StrokeMode>({
+    color: '#ef4444', width: 4, isHighlighter: false, isEraser: false,
+  })
+
   const [isOpen, setIsOpen] = useState(false)
   const [isClient, setIsClient] = useState(false)
   const pathname = usePathname()
@@ -77,12 +112,18 @@ export function DrawingCanvas() {
   const [currentStrokeId, setCurrentStrokeId] = useState<string | null>(null)
   const [isEraserActive, setIsEraserActive] = useState(false)
 
-  useEffect(() => {
-    setIsClient(true)
-  }, [])
+  const [strokeColor, setStrokeColor] = useState('#ef4444')
+  const [strokeWidth, setStrokeWidth] = useState(4)
+  const [isHighlighter, setIsHighlighter] = useState(false)
+  const [isToolbarOpen, setIsToolbarOpen] = useState(false)
+
+  useEffect(() => { setIsClient(true) }, [])
 
   useEffect(() => {
-    // Quando muda de rota, carregar o desenho da nova rota
+    if (!isOpen) setIsToolbarOpen(false)
+  }, [isOpen])
+
+  useEffect(() => {
     if (isClient) {
       const drawings = getSavedDrawings()
       setStrokes(drawings[pathname] || [])
@@ -90,331 +131,180 @@ export function DrawingCanvas() {
   }, [pathname, isClient])
 
   useEffect(() => {
-    // Salvar o desenho atual quando os traços mudarem
-    if (isClient) {
-      saveDrawing(pathname, strokes)
-    }
+    if (isClient) saveDrawing(pathname, strokes)
   }, [strokes, pathname, isClient])
 
   useEffect(() => {
     if (!isOpen || !isClient) return
-
     const canvas = canvasRef.current
     if (!canvas) return
-
-    // Definir o tamanho do canvas
-    const initCanvas = () => {
-      const current = canvasRef.current
-      if (!current) return
-
-      current.width = window.innerWidth
-      current.height = window.innerHeight
-
-      const context = current.getContext('2d')
-      if (!context) return
-
-      context.lineCap = 'round'
-      context.lineJoin = 'round'
-      context.lineWidth = 4
-      context.strokeStyle = '#ef4444'
-      
-      // Redesenhar o desenho da página atual
-      redrawCanvas()
-    }
-
-    initCanvas()
+    canvas.width = window.innerWidth
+    canvas.height = window.innerHeight
+    redrawCanvas()
   }, [isOpen, isClient, strokes, pathname])
 
   useEffect(() => {
     if (!isOpen || !isClient) return
-
-    const canvas = canvasRef.current
-    if (!canvas) return
-
-    const handleScroll = () => {
-      redrawCanvas()
-    }
-
+    const handleScroll = () => redrawCanvas()
     window.addEventListener('scroll', handleScroll, { passive: true })
-
-    return () => {
-      window.removeEventListener('scroll', handleScroll)
-    }
+    return () => window.removeEventListener('scroll', handleScroll)
   }, [isOpen, isClient, strokes])
 
-  const getContext = () => {
-    const current = canvasRef.current
-    if (!current) return null
-    return current.getContext('2d')
+  const getContext = () => canvasRef.current?.getContext('2d') ?? null
+
+  const applyStrokeMode = (ctx: CanvasRenderingContext2D, mode: StrokeMode) => {
+    ctx.lineCap = 'round'
+    ctx.lineJoin = 'round'
+    if (mode.isEraser) {
+      ctx.globalCompositeOperation = 'destination-out'
+      ctx.globalAlpha = 1
+      ctx.lineWidth = 30
+    } else if (mode.isHighlighter) {
+      ctx.globalCompositeOperation = 'source-over'
+      ctx.globalAlpha = 0.38
+      ctx.lineWidth = 24
+      ctx.strokeStyle = mode.color
+    } else {
+      ctx.globalCompositeOperation = 'source-over'
+      ctx.globalAlpha = 1
+      ctx.lineWidth = mode.width
+      ctx.strokeStyle = mode.color
+    }
+  }
+
+  const resetContext = (ctx: CanvasRenderingContext2D) => {
+    ctx.globalAlpha = 1
+    ctx.globalCompositeOperation = 'source-over'
   }
 
   const redrawCanvas = () => {
     const canvas = canvasRef.current
-    const context = getContext()
-    if (!canvas || !context) return
-
-    const currentScrollX = window.scrollX
-    const currentScrollY = window.scrollY
-
-    context.clearRect(0, 0, canvas.width, canvas.height)
-
+    const ctx = getContext()
+    if (!canvas || !ctx) return
+    const scrollX = window.scrollX
+    const scrollY = window.scrollY
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
     for (const stroke of strokes) {
       if (stroke.points.length === 0) continue
-      
-      context.beginPath()
-      context.lineCap = 'round'
-      context.lineJoin = 'round'
-      
-      // Verificar se é um traço de borracha antigo
       const isEraserStroke = stroke.isEraser || stroke.points.some(p => (p as any).isEraser)
-      
-      if (isEraserStroke) {
-        context.globalCompositeOperation = 'destination-out'
-        context.lineWidth = 30
-      } else {
-        context.globalCompositeOperation = 'source-over'
-        context.lineWidth = 4
-        context.strokeStyle = '#ef4444'
-      }
-      
-      stroke.points.forEach((point, index) => {
-        const x = point.x - currentScrollX
-        const y = point.y - currentScrollY
-        
-        if (point.isStart) {
-          context.moveTo(x, y)
-        } else {
-          context.lineTo(x, y)
-        }
+      ctx.beginPath()
+      applyStrokeMode(ctx, {
+        color: stroke.color ?? '#ef4444',
+        width: stroke.width ?? 4,
+        isHighlighter: stroke.isHighlighter ?? false,
+        isEraser: !!isEraserStroke,
       })
-      context.stroke()
+      stroke.points.forEach(p => {
+        const x = p.x - scrollX
+        const y = p.y - scrollY
+        if (p.isStart) ctx.moveTo(x, y)
+        else ctx.lineTo(x, y)
+      })
+      ctx.stroke()
+      resetContext(ctx)
     }
-    
-    context.globalCompositeOperation = 'source-over' // Resetar o modo
   }
 
-  const isPointOnStroke = (x: number, y: number, stroke: Stroke, tolerance: number = 15): boolean => {
-    // Algoritmo para detectar se o ponto está em algum segmento da linha
+  const isPointOnStroke = (x: number, y: number, stroke: Stroke, tolerance = 15): boolean => {
     for (let i = 1; i < stroke.points.length; i++) {
       const p1 = stroke.points[i - 1]
       const p2 = stroke.points[i]
-      
-      // Calcular a distância do ponto (x,y) ao segmento (p1,p2)
-      const A = x - p1.x
-      const B = y - p1.y
-      const C = p2.x - p1.x
-      const D = p2.y - p1.y
-      
-      const dot = A * C + B * D
-      const lenSq = C * C + D * D
-      let param = -1
-      
-      if (lenSq !== 0) param = dot / lenSq
-      
-      let xx: number
-      let yy: number
-      
-      if (param < 0) {
-        xx = p1.x
-        yy = p1.y
-      } else if (param > 1) {
-        xx = p2.x
-        yy = p2.y
-      } else {
-        xx = p1.x + param * C
-        yy = p1.y + param * D
-      }
-      
-      const dx = x - xx
-      const dy = y - yy
-      const distance = Math.sqrt(dx * dx + dy * dy)
-      
-      if (distance <= tolerance) {
-        return true
-      }
+      const A = x - p1.x, B = y - p1.y
+      const C = p2.x - p1.x, D = p2.y - p1.y
+      const param = (C * C + D * D) !== 0 ? (A * C + B * D) / (C * C + D * D) : -1
+      const xx = param < 0 ? p1.x : param > 1 ? p2.x : p1.x + param * C
+      const yy = param < 0 ? p1.y : param > 1 ? p2.y : p1.y + param * D
+      if (Math.sqrt((x - xx) ** 2 + (y - yy) ** 2) <= tolerance) return true
     }
     return false
   }
 
   const deleteStrokeAtPoint = (x: number, y: number) => {
-    // Percorrer na ordem inversa para apagar o traço que está no topo
     for (let i = strokes.length - 1; i >= 0; i--) {
       if (isPointOnStroke(x, y, strokes[i])) {
-        setStrokes(prev => prev.filter((_, index) => index !== i))
-        return true
+        setStrokes(prev => prev.filter((_, idx) => idx !== i))
+        return
       }
     }
-    return false
   }
 
-  const checkEraserButton = (event: PointerEvent | React.PointerEvent): boolean => {
-    // Verifica todos os bits possíveis para botão lateral da S Pen (compatibilidade máxima)
-    // Bit 5 (32) é o botão erazer/lateral padrão
-    // Alguns dispositivos usam bit 1 (2) ou combinações
-    const isEraserPressed = 
-      (event.buttons & 32) !== 0 || 
-      event.buttons === 32 ||
-      (event.buttons & 0x20) !== 0
-    
-    return isEraserPressed
-  }
-
-  const applyCanvasMode = (context: CanvasRenderingContext2D, isEraser: boolean) => {
-    context.lineCap = 'round'
-    context.lineJoin = 'round'
-    
-    if (isEraser) {
-      context.globalCompositeOperation = 'destination-out'
-      context.lineWidth = 30
-    } else {
-      context.globalCompositeOperation = 'source-over'
-      context.lineWidth = 4
-      context.strokeStyle = '#ef4444'
-    }
-  }
+  const checkEraserButton = (event: PointerEvent | React.PointerEvent): boolean =>
+    (event.buttons & 32) !== 0 || event.buttons === 32 || (event.buttons & 0x20) !== 0
 
   const startDrawing = (event: React.PointerEvent) => {
-    if (event.button === 2) return // Botão direito é para apagar traço completo
-
+    if (event.button === 2) return
     const isEraser = checkEraserButton(event)
     isEraserModeRef.current = isEraser
     setIsEraserActive(isEraser)
+
+    const mode: StrokeMode = { color: strokeColor, width: strokeWidth, isHighlighter, isEraser }
+    currentStrokeModeRef.current = mode
     isDrawingRef.current = true
 
-    console.log('[S Pen] Iniciando desenho', {
-      pointerType: event.pointerType,
-      buttons: event.buttons,
-      isEraser
-    })
-
-    const context = getContext()
-    if (!context) return
-
-    const currentScrollX = window.scrollX
-    const currentScrollY = window.scrollY
+    const ctx = getContext()
+    if (!ctx) return
     const strokeId = crypto.randomUUID()
     setCurrentStrokeId(strokeId)
-    
-    const point: DrawPoint = { 
-      x: event.pageX, 
-      y: event.pageY, 
-      isStart: true, 
-      pressure: event.pressure,
-      tiltX: event.tiltX,
-      tiltY: event.tiltY
+
+    const point: DrawPoint = {
+      x: event.pageX, y: event.pageY, isStart: true,
+      pressure: event.pressure, tiltX: event.tiltX, tiltY: event.tiltY,
     }
-    setStrokes(prev => [...prev, { id: strokeId, points: [point] }])
-    
-    // Inicializar canvas
-    applyCanvasMode(context, isEraser)
-    context.beginPath()
-    context.moveTo(event.pageX - currentScrollX, event.pageY - currentScrollY)
+    setStrokes(prev => [...prev, { id: strokeId, points: [point], color: strokeColor, width: strokeWidth, isHighlighter }])
+
+    applyStrokeMode(ctx, mode)
+    ctx.beginPath()
+    ctx.moveTo(event.pageX - window.scrollX, event.pageY - window.scrollY)
   }
 
   const continueDrawing = (event: React.PointerEvent) => {
     if (!isDrawingRef.current || !currentStrokeId) return
-
     const isEraser = checkEraserButton(event)
-    
-    // Atualizar estado visual do modo
     if (isEraser !== isEraserModeRef.current) {
       isEraserModeRef.current = isEraser
       setIsEraserActive(isEraser)
     }
-
-    const context = getContext()
-    if (!context) return
-
-    const currentScrollX = window.scrollX
-    const currentScrollY = window.scrollY
-    
-    const point: DrawPoint = { 
-      x: event.pageX, 
-      y: event.pageY, 
-      isStart: false, 
-      pressure: event.pressure,
-      tiltX: event.tiltX,
-      tiltY: event.tiltY
+    const ctx = getContext()
+    if (!ctx) return
+    const point: DrawPoint = {
+      x: event.pageX, y: event.pageY, isStart: false,
+      pressure: event.pressure, tiltX: event.tiltX, tiltY: event.tiltY,
     }
-    setStrokes(prev => prev.map(s => 
+    setStrokes(prev => prev.map(s =>
       s.id === currentStrokeId ? { ...s, points: [...s.points, point] } : s
     ))
-    
-    // Aplicar modo correto e continuar desenhando
-    applyCanvasMode(context, isEraser)
-    context.lineTo(event.pageX - currentScrollX, event.pageY - currentScrollY)
-    context.stroke()
-
-    console.log('[S Pen] Desenhando', {
-      isEraser,
-      x: event.pageX,
-      y: event.pageY
-    })
+    applyStrokeMode(ctx, currentStrokeModeRef.current)
+    ctx.lineTo(event.pageX - window.scrollX, event.pageY - window.scrollY)
+    ctx.stroke()
   }
 
   const stopDrawing = () => {
     isDrawingRef.current = false
     setCurrentStrokeId(null)
+    const ctx = getContext()
+    if (ctx) resetContext(ctx)
   }
 
   const clearCanvas = () => {
     setStrokes([])
-    const current = canvasRef.current
-    const context = getContext()
-    if (!current || !context) return
-
-    context.clearRect(0, 0, current.width, current.height)
+    const canvas = canvasRef.current
+    const ctx = getContext()
+    if (canvas && ctx) ctx.clearRect(0, 0, canvas.width, canvas.height)
   }
 
-  if (!isClient) {
-    return null
-  }
+  const activeCursor = isEraserActive ? 'cursor-cell' : isHighlighter ? 'cursor-text' : 'cursor-crosshair'
+
+  if (!isClient) return null
 
   return (
     <>
-      {/* Botão FAB no canto inferior direito */}
-      <button
-        type="button"
-        onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 z-40 w-14 h-14 rounded-full bg-blue-600 hover:bg-blue-700 shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center text-white group"
-        aria-label="Abrir ferramenta de desenho"
-      >
-        <svg 
-          className="w-7 h-7 transition-transform duration-300 group-hover:scale-110" 
-          fill="none" 
-          stroke="currentColor" 
-          viewBox="0 0 24 24"
-        >
-          <path 
-            strokeLinecap="round" 
-            strokeLinejoin="round" 
-            strokeWidth={2} 
-            d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" 
-          />
-        </svg>
-      </button>
-
+      {/* Canvas overlay */}
       {isOpen && (
         <div className="fixed inset-0 z-[100] pointer-events-none">
-          <div className="absolute right-4 top-4 z-[101] flex gap-2 pointer-events-auto">
-            <Button type="button" variant="secondary" onClick={clearCanvas}>
-              Limpar
-            </Button>
-            <Button type="button" variant="destructive" onClick={() => setIsOpen(false)}>
-              Fechar
-            </Button>
-          </div>
-
           <canvas
             ref={canvasRef}
-            className={cn(
-              "fixed inset-0 block h-screen w-screen touch-none pointer-events-auto",
-              isEraserActive ? "cursor-cell" : "cursor-crosshair"
-            )}
-            onContextMenu={(e) => {
-              e.preventDefault()
-              deleteStrokeAtPoint(e.pageX, e.pageY)
-            }}
+            className={cn('fixed inset-0 block h-screen w-screen touch-none pointer-events-auto', activeCursor)}
+            onContextMenu={e => { e.preventDefault(); deleteStrokeAtPoint(e.pageX, e.pageY) }}
             onPointerDown={startDrawing}
             onPointerMove={continueDrawing}
             onPointerUp={stopDrawing}
@@ -422,6 +312,182 @@ export function DrawingCanvas() {
           />
         </div>
       )}
+
+      {/* Container — FAB + toolbar */}
+      <div className="fixed bottom-6 right-6 z-[200]">
+
+        {/* Toolbar vertical — aparece acima do FAB */}
+        <div className={cn(
+          'absolute bottom-full right-0 mb-3',
+          'transition-all duration-200 ease-out origin-bottom-right',
+          isOpen && isToolbarOpen
+            ? 'opacity-100 scale-100 translate-x-0 pointer-events-auto'
+            : 'opacity-0 scale-90 translate-x-1 pointer-events-none',
+        )}>
+          <div className={cn(
+            'flex flex-col items-center gap-2 py-3 px-2',
+            'bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl',
+            'border border-slate-200/60 dark:border-slate-700/60',
+            'rounded-2xl shadow-lg shadow-black/8 dark:shadow-black/40',
+          )}>
+
+            {/* Cores 2×4 */}
+            <div className="grid grid-cols-2 gap-1.5">
+              {COLORS.map(color => (
+                <button
+                  key={color}
+                  type="button"
+                  onClick={() => setStrokeColor(color)}
+                  className={cn(
+                    'w-5 h-5 rounded-full',
+                    'border-2 transition-all duration-150 hover:scale-125 active:scale-90',
+                    strokeColor === color
+                      ? 'border-slate-700 dark:border-white scale-[1.2] shadow-sm'
+                      : 'border-transparent',
+                  )}
+                  style={{ backgroundColor: color }}
+                />
+              ))}
+            </div>
+
+            <div className="w-full h-px bg-slate-100 dark:bg-slate-800" />
+
+            {/* Espessuras verticais */}
+            <div className="flex flex-col items-center gap-0.5">
+              {WIDTHS.map(w => (
+                <button
+                  key={w.value}
+                  type="button"
+                  onClick={() => { setStrokeWidth(w.value); setIsHighlighter(false) }}
+                  className={cn(
+                    'w-10 h-7 rounded-md flex items-center justify-center',
+                    'transition-all duration-150 active:scale-90',
+                    strokeWidth === w.value && !isHighlighter
+                      ? 'bg-slate-100 dark:bg-slate-800 ring-1 ring-slate-400/60 dark:ring-slate-500/60'
+                      : 'hover:bg-slate-100 dark:hover:bg-slate-800',
+                  )}
+                >
+                  <svg width="22" height="18" viewBox="0 0 22 18" fill="none">
+                    <line
+                      x1="3" y1="9" x2="19" y2="9"
+                      stroke={strokeColor}
+                      strokeWidth={w.visual}
+                      strokeLinecap="round"
+                      opacity={isHighlighter ? 0.25 : 1}
+                    />
+                  </svg>
+                </button>
+              ))}
+            </div>
+
+            <div className="w-full h-px bg-slate-100 dark:bg-slate-800" />
+
+            {/* Marcador */}
+            <button
+              type="button"
+              onClick={() => setIsHighlighter(prev => !prev)}
+              title="Marcador de texto"
+              className={cn(
+                'w-10 h-7 rounded-md flex items-center justify-center',
+                'transition-all duration-150 active:scale-90',
+                isHighlighter
+                  ? 'bg-yellow-100 dark:bg-yellow-900/40 ring-1 ring-yellow-400/70 dark:ring-yellow-500/60'
+                  : 'hover:bg-slate-100 dark:hover:bg-slate-800',
+              )}
+            >
+              <Highlighter className={cn(
+                'w-3.5 h-3.5 transition-colors',
+                isHighlighter
+                  ? 'text-yellow-600 dark:text-yellow-400'
+                  : 'text-slate-400 dark:text-slate-500',
+              )} />
+            </button>
+
+          </div>
+        </div>
+
+        {/* Botões de ação */}
+        <div className="flex items-center gap-2">
+
+          {/* Limpar tudo */}
+          <div className={cn(
+            'transition-all duration-300 ease-out',
+            isOpen ? 'opacity-100 translate-x-0 pointer-events-auto' : 'opacity-0 translate-x-3 pointer-events-none',
+          )}>
+            <button
+              type="button"
+              onClick={clearCanvas}
+              className={cn(
+                'flex items-center gap-1.5 h-10 px-3.5 rounded-full',
+                'bg-white/95 dark:bg-slate-900/95 backdrop-blur-md',
+                'border border-slate-200 dark:border-slate-700',
+                'shadow-md shadow-black/8 dark:shadow-black/30',
+                'text-sm font-medium text-slate-500 dark:text-slate-400',
+                'hover:text-red-500 dark:hover:text-red-400 hover:border-red-200 dark:hover:border-red-800',
+                'transition-all duration-200 active:scale-95',
+              )}
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+              Limpar
+            </button>
+          </div>
+
+          {/* Mais detalhes — abre toolbar vertical */}
+          <div className={cn(
+            'transition-all duration-300 ease-out',
+            isOpen ? 'opacity-100 scale-100 pointer-events-auto' : 'opacity-0 scale-75 pointer-events-none',
+          )}>
+            <button
+              type="button"
+              onClick={() => setIsToolbarOpen(prev => !prev)}
+              title="Ferramentas"
+              className={cn(
+                'w-10 h-10 rounded-full flex items-center justify-center',
+                'backdrop-blur-md border shadow-md transition-all duration-200 active:scale-95',
+                isToolbarOpen
+                  ? 'bg-slate-900 dark:bg-white border-slate-900 dark:border-white text-white dark:text-slate-900'
+                  : 'bg-white/95 dark:bg-slate-900/95 border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200',
+              )}
+            >
+              <SlidersHorizontal className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
+          {/* FAB — lápis ↔ X */}
+          <button
+            type="button"
+            onClick={() => setIsOpen(prev => !prev)}
+            aria-label={isOpen ? 'Fechar' : 'Desenhar'}
+            className={cn(
+              'relative w-12 h-12 rounded-full flex items-center justify-center overflow-hidden flex-shrink-0',
+              'bg-gradient-to-tr from-blue-600 to-indigo-600',
+              'shadow-lg transition-all duration-300 ease-out',
+              isOpen
+                ? 'shadow-indigo-500/40 scale-105 ring-4 ring-indigo-300/20 dark:ring-indigo-400/20'
+                : 'shadow-blue-600/30 hover:shadow-blue-600/50 hover:scale-110 active:scale-95',
+            )}
+          >
+            <span className="absolute inset-0 rounded-full bg-gradient-to-b from-white/15 to-transparent pointer-events-none" />
+
+            <svg
+              className={cn(
+                'absolute w-5 h-5 text-white transition-all duration-300 ease-out',
+                isOpen ? 'opacity-0 scale-50 rotate-45' : 'opacity-100 scale-100 rotate-0',
+              )}
+              fill="none" stroke="currentColor" viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+              />
+            </svg>
+
+            <X className={cn(
+              'absolute w-5 h-5 text-white transition-all duration-300 ease-out',
+              isOpen ? 'opacity-100 scale-100 rotate-0' : 'opacity-0 scale-50 -rotate-45',
+            )} />
+          </button>
+        </div>
+      </div>
     </>
   )
 }
