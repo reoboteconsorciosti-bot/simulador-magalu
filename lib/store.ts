@@ -46,6 +46,7 @@ const initialUsers: (User & { password: string })[] = [
 interface AuthState {
   user: User | null
   users: (User & { password: string })[]
+  setUser: (user: User | null) => void
   logout: () => void
   addUser: (user: Omit<User, 'id'> & { password: string }) => void
   updateUser: (id: string, data: Partial<User>) => void
@@ -66,6 +67,7 @@ export const useAuthStore = create<AuthState>()(
     (set, get) => ({
       user: null,
       users: initialUsers,
+      setUser: (user) => set({ user }),
       logout: () => set({ user: null }),
       addUser: (userData) => {
         const newUser = {
