@@ -124,6 +124,24 @@ export function DrawingCanvas() {
   }, [isOpen])
 
   useEffect(() => {
+    if (isOpen) {
+      document.documentElement.requestFullscreen().catch(() => {})
+    } else {
+      if (document.fullscreenElement) {
+        document.exitFullscreen().catch(() => {})
+      }
+    }
+  }, [isOpen])
+
+  useEffect(() => {
+    const onFullscreenChange = () => {
+      if (!document.fullscreenElement) setIsOpen(false)
+    }
+    document.addEventListener('fullscreenchange', onFullscreenChange)
+    return () => document.removeEventListener('fullscreenchange', onFullscreenChange)
+  }, [])
+
+  useEffect(() => {
     if (isClient) {
       const drawings = getSavedDrawings()
       setStrokes(drawings[pathname] || [])
