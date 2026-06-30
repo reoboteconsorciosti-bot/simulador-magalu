@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { DrawingCanvas } from '@/components/drawing-canvas'
@@ -14,11 +14,14 @@ import {
   PiggyBank,
   Menu,
   X,
-  Moon,
-  Sun,
   Wallet,
+  LogOut,
+  Maximize2,
+  Minimize2,
 } from 'lucide-react'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useAuthStore } from '@/lib/store'
+import { getCurrentUser, logoutAction } from '@/app/actions/auth'
 
 const navigation = [
   { name: 'Nova Simulação', href: '/dashboard/simulacao', icon: Calculator },
@@ -34,7 +37,49 @@ export default function DashboardLayout({
   children: React.ReactNode
 }) {
   const pathname = usePathname()
+  const router = useRouter()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [isFullscreen, setIsFullscreen] = useState(false)
+
+  useEffect(() => {
+    const onFsChange = () => setIsFullscreen(!!document.fullscreenElement)
+    document.addEventListener('fullscreenchange', onFsChange)
+    return () => document.removeEventListener('fullscreenchange', onFsChange)
+  }, [])
+
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(() => {})
+    } else {
+      document.exitFullscreen().catch(() => {})
+    }
+  }
+
+  const user = useAuthStore(state => state.user)
+  const setUser = useAuthStore(state => state.setUser)
+  const logout = useAuthStore(state => state.logout)
+
+  // Sync session on mount: if cookie expired, clear store and redirect to login
+  useEffect(() => {
+    getCurrentUser().then(serverUser => {
+      if (!serverUser) {
+        logout()
+        router.replace('/login')
+      } else {
+        setUser(serverUser)
+      }
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  const handleLogout = async () => {
+    try {
+      await logoutAction()
+    } finally {
+      logout()
+      router.replace('/login')
+    }
+  }
 
   return (
     <div className="min-h-screen bg-background flex flex-col overflow-x-hidden">
@@ -54,7 +99,7 @@ export default function DashboardLayout({
               <Menu className="h-5 w-5 transition-all duration-300 rotate-0" />
             )}
           </Button>
-          
+
           {/* Logo */}
           <div className="bg-gradient-to-tr from-blue-600 to-indigo-600 p-2.5 rounded-lg flex items-center justify-center text-white shadow-lg">
             <TrendingUp className="h-5 w-5" />
@@ -89,14 +134,40 @@ export default function DashboardLayout({
           })}
         </nav>
 
-        {/* Right side controls - always on the far right */}
-        <div className="flex items-center gap-4 ml-auto">
+        {/* Right side controls */}
+        <div className="flex items-center gap-2 ml-auto">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggleFullscreen}
+            title={isFullscreen ? 'Sair da tela cheia' : 'Tela cheia'}
+            className="text-muted-foreground hover:text-foreground transition-colors"
+          >
+            {isFullscreen ? (
+              <Minimize2 className="h-4 w-4" />
+            ) : (
+              <Maximize2 className="h-4 w-4" />
+            )}
+          </Button>
           <DrawingCanvas />
           <ThemeToggle />
-          <div className="hidden xl:flex items-center gap-3 text-sm text-muted-foreground">
+          <div className="hidden xl:flex items-center gap-3 text-sm text-muted-foreground ml-2">
             <span className="bg-accent px-3 py-1.5 rounded-full text-xs font-bold text-blue-600 border border-border">ONLINE</span>
-            <span>Reobote Consórcios</span>
+            {user && (
+              <span className="font-medium text-foreground max-w-[160px] truncate">
+                {user.name}
+              </span>
+            )}
           </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleLogout}
+            title="Sair do sistema"
+            className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+          >
+            <LogOut className="h-4 w-4" />
+          </Button>
         </div>
       </header>
 
@@ -127,6 +198,14 @@ export default function DashboardLayout({
               </Link>
             );
           })}
+          {/* Logout no menu mobile */}
+          <button
+            onClick={handleLogout}
+            className="flex w-full items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-all duration-200"
+          >
+            <LogOut className="h-5 w-5" />
+            Sair do sistema
+          </button>
         </nav>
       </div>
 

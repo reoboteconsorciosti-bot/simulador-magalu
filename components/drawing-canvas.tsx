@@ -124,24 +124,6 @@ export function DrawingCanvas() {
   }, [isOpen])
 
   useEffect(() => {
-    if (isOpen) {
-      document.documentElement.requestFullscreen().catch(() => {})
-    } else {
-      if (document.fullscreenElement) {
-        document.exitFullscreen().catch(() => {})
-      }
-    }
-  }, [isOpen])
-
-  useEffect(() => {
-    const onFullscreenChange = () => {
-      if (!document.fullscreenElement) setIsOpen(false)
-    }
-    document.addEventListener('fullscreenchange', onFullscreenChange)
-    return () => document.removeEventListener('fullscreenchange', onFullscreenChange)
-  }, [])
-
-  useEffect(() => {
     if (isClient) {
       const drawings = getSavedDrawings()
       setStrokes(drawings[pathname] || [])
@@ -250,8 +232,8 @@ export function DrawingCanvas() {
     (event.buttons & 32) !== 0 || event.buttons === 32 || (event.buttons & 0x20) !== 0
 
   const startDrawing = (event: React.PointerEvent) => {
-    if (event.pointerType !== 'pen') return
-    event.preventDefault()
+    if (event.pointerType === 'touch') return
+    if (event.pointerType === 'pen') event.preventDefault()
     canvasRef.current?.setPointerCapture(event.pointerId)
     if (event.button === 2) return
     const isEraser = checkEraserButton(event)
@@ -279,7 +261,7 @@ export function DrawingCanvas() {
   }
 
   const continueDrawing = (event: React.PointerEvent) => {
-    if (event.pointerType !== 'pen') return
+    if (event.pointerType === 'touch') return
     if (!isDrawingRef.current || !currentStrokeId) return
     const isEraser = checkEraserButton(event)
     if (isEraser !== isEraserModeRef.current) {
