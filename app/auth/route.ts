@@ -42,8 +42,9 @@ export async function GET(request: NextRequest) {
 
   console.log('[magalu-auth] Sessão criada com sucesso.')
 
-  const response = NextResponse.redirect(new URL('/', request.url))
+  const publicUrl = process.env.NEXT_PUBLIC_URL || 'https://simuladormagalu.reoboteconsorcios.com.br'
+  const response = NextResponse.redirect(new URL('/', publicUrl))
   response.cookies.set(COOKIE_NAME, sessionToken, getSessionCookieOptions())
-  console.log('[magalu-auth] Redirecionamento executado para /.')
+  console.log('[magalu-auth] Redirecionamento executado para:', publicUrl)
   return response
 }
