@@ -24,6 +24,9 @@ COPY . .
 # Set environment variable (can be overridden)
 ENV NODE_ENV=production
 
+# Generate Prisma Client
+RUN pnpm prisma generate
+
 # Build the Next.js app
 RUN pnpm build
 
