@@ -99,6 +99,7 @@ const saveDrawing = (pathname: string, strokes: Stroke[]) => {
 
 export function DrawingCanvas() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
+  const overlayRef = useRef<HTMLDivElement | null>(null)
   const isDrawingRef = useRef(false)
   const isEraserModeRef = useRef(false)
   const currentStrokeModeRef = useRef<StrokeMode>({
@@ -145,16 +146,16 @@ export function DrawingCanvas() {
 
   useEffect(() => {
     if (!isOpen || !isClient) return
-    const canvas = canvasRef.current
-    if (!canvas) return
+    const overlay = overlayRef.current
+    if (!overlay) return
     const preventDefaultForPen = (e: PointerEvent) => {
       if (e.pointerType === 'pen') e.preventDefault()
     }
-    canvas.addEventListener('pointerdown', preventDefaultForPen, { passive: false })
-    canvas.addEventListener('pointermove', preventDefaultForPen, { passive: false })
+    overlay.addEventListener('pointerdown', preventDefaultForPen, { passive: false })
+    overlay.addEventListener('pointermove', preventDefaultForPen, { passive: false })
     return () => {
-      canvas.removeEventListener('pointerdown', preventDefaultForPen)
-      canvas.removeEventListener('pointermove', preventDefaultForPen)
+      overlay.removeEventListener('pointerdown', preventDefaultForPen)
+      overlay.removeEventListener('pointermove', preventDefaultForPen)
     }
   }, [isOpen, isClient])
 
@@ -220,7 +221,7 @@ export function DrawingCanvas() {
     }
   }
 
-  const isPointOnStroke = (x: number, y: number, stroke: Stroke, tolerance = 15): boolean => {
+  const isPointOnStroke = (x: number, y: number, stroke: Stroke, tolerance = 30): boolean => {
     for (let i = 1; i < stroke.points.length; i++) {
       const p1 = stroke.points[i - 1]
       const p2 = stroke.points[i]
@@ -248,7 +249,7 @@ export function DrawingCanvas() {
 
   const startDrawing = (event: React.PointerEvent) => {
     if (event.pointerType === 'touch') return
-    canvasRef.current?.setPointerCapture(event.pointerId)
+    ;(event.currentTarget as Element).setPointerCapture(event.pointerId)
     if (event.button === 2) return
     const isEraser = checkEraserButton(event)
     isEraserModeRef.current = isEraser
@@ -318,10 +319,16 @@ export function DrawingCanvas() {
     <>
       {/* Canvas overlay */}
       {isOpen && (
-        <div className="fixed inset-0 z-[100] pointer-events-none">
+        <>
+          {/* Canvas: só renderiza, sem capturar eventos */}
           <canvas
             ref={canvasRef}
-            className={cn('fixed inset-0 block h-screen w-screen touch-none pointer-events-auto', activeCursor)}
+            className="fixed inset-0 z-[100] block h-screen w-screen pointer-events-none"
+          />
+          {/* Overlay: captura eventos de caneta/mouse, deixa toque do dedo passar */}
+          <div
+            ref={overlayRef}
+            className={cn('fixed inset-0 z-[101] pointer-events-auto', activeCursor)}
             onContextMenu={e => { e.preventDefault(); deleteStrokeAtPoint(e.pageX, e.pageY) }}
             onPointerDown={startDrawing}
             onPointerMove={continueDrawing}
@@ -329,7 +336,7 @@ export function DrawingCanvas() {
             onPointerCancel={stopDrawing}
             onPointerLeave={stopDrawing}
           />
-        </div>
+        </>
       )}
 
       {/* Container — FAB + toolbar */}
