@@ -1,0 +1,142 @@
+
+# RESUMO COMPLETO DA INTEGRAÇÃO E CONFIGURAÇÕES
+
+## 1. RESUMO DE TUDO QUE ACONTECEU
+
+Aqui está uma lista cronológica das modificações e implementações feitas no projeto Simulador Magalu (baseado no histórico do projeto):
+
+### 1.1 Correção visual da logo na página de login
+- Removida a classe `dark:invert` da logo para preservar as cores originais no modo escuro
+- Garantiu fidelidade às cores do mockup
+
+### 1.2 Configuração do Prisma 7
+- Implementado padrão Singleton para conexão com o banco de dados compartilhado
+- Sincronizado schema com o Simulador Central
+- Proibido realizar migrações para manter a compatibilidade
+
+### 1.3 Implementação da autenticação compartilhada
+- Criação da rota `/auth` para receber tokens do Simulador Central
+- Validação manual de tokens customizado (não JWT padrão)
+- Criação de sessão local com cookie seguro
+- Proteção de rotas (retorna 404 para acessos não autenticados)
+
+### 1.4 Refinamento do cabeçalho do dashboard
+- Inicialmente exibia nome, e-mail e rótulo "Sessão ativa"
+- Simplificado para exibir apenas o nome do usuário + ícone de perfil
+- Removido ícone de logout do cabeçalho (mantido apenas no menu mobile)
+
+### 1.5 Migração do middleware
+- Arquivo `middleware.ts` → `proxy.ts` para resolver aviso de depreciação
+
+### 1.6 Correção do erro TypeScript "Cannot find name 'logoutAction'"
+- Criado `lib/auth-actions.ts` com server action de logout
+- Importado corretamente no `dashboard-shell.tsx`
+
+---
+
+## 2. INTEGRAÇÃO ENTRE SIMULADOR CENTRAL E SIMULADOR MAGALU
+
+A integração funciona da seguinte forma:
+
+### 2.1 Fluxo de autenticação
+1. O usuário acessa o Simulador Central e clica em um link/button para abrir o Simulador Magalu
+2. O Simulador Central gera um token customizado e redireciona para `/auth?token=[token]
+3. O Simulador Magalu valida o token e cria uma sessão local
+4. O usuário é redirecionado para o dashboard
+
+### 2.2 Formato do token do Simulador Central
+- Não é um JWT padrão (não tem header)
+- Formato: `PayloadB64.SignatureB64` (2 partes separadas por ponto)
+- Assinado via HMAC-SHA256
+- Verificado manualmente com o módulo `crypto` nativo do Node.js
+
+### 2.3 Validação do token
+1. Extrai o payload e a assinatura
+2. Recalcula a assinatura esperada com o segredo compartilhado
+3. Compara usando `timingSafeEqual` para evitar ataques de timing
+4. Verifica expiração do token (`exp` no payload)
+5. Consulta o usuário no banco de dados compartilhado
+
+### 2.4 Sessão local
+- Criado cookie `reobote_session` com:
+  - userId
+  - email
+  - role
+  - name
+  - active
+- Cookie HTTP-only, seguro em produção
+- Validade de 7 dias
+
+---
+
+## 3. EXPLICAÇÃO DAS CREDENCIAIS NO .env
+
+Arquivo: `.env` (linhas 4-7):
+
+```env
+CENTRAL_AUTH_JWT_SECRET="484sfd5aefDFSDF@fd4fsd87s8d4sar9g7ar9gafsDSD--dsd44ds4a4w@"
+AUTH_SECRET="484sfd5aefDFSDF@fd4fsd87s8d4sar9g7ar9gafsDSD--dsd44ds4a4w@"
+
+SESSION_SECRET="dev_secret_key_reobote_session_2026"
+```
+
+### 3.1 CENTRAL_AUTH_JWT_SECRET
+- **O que é?: Segredo compartilhado com o Simulador Central
+- **Uso?: Verificar a autenticidade dos tokens recebidos do Simulador Central
+- **Importante**: Deve ser EXATAMENTE a mesma string no Simulador Central e no Simulador Magalu
+- **Tratamento**: Lido como string literal (sem remover espaços ou caracteres especiais)
+
+### 3.2 AUTH_SECRET
+- **O que é?: Alias para o CENTRAL_AUTH_JWT_SECRET
+- **Uso**: Fallback se CENTRAL_AUTH_JWT_SECRET não estiver definido
+- **Atual**: Tem o mesmo valor que CENTRAL_AUTH_JWT_SECRET
+
+### 3.3 SESSION_SECRET
+- **O que é?: Segredo exclusivo do Simulador Magalu
+- **Uso**: Assinar os tokens de sessão LOCAL do Simulador Magalu
+- **Não é compartilhado**: Não precisa ser o mesmo no Simulador Central
+- **Para produção**: Deve ser uma string longa e aleatória
+
+---
+
+## 4. O QUE O proxy.ts ESTÁ FAZENDO?
+
+Arquivo: `proxy.ts`
+
+```typescript
+import { NextRequest, NextResponse } from 'next/server'
+
+export async function proxy(request: NextRequest) {
+  return NextResponse.next()
+}
+
+export const config = {
+  matcher: [
+    '/((?!_next/static|_next/image|favicon\\.ico|favicon/|apple-icon\\.png|.*\\.(?:png|jpg|jpeg|gif|svg|webp|ico)$).*)',
+  ],
+}
+```
+
+### 4.1 Funcionalidade atual
+- **Não faz nada útil no momento!
+- A função `proxy` simplesmente retorna `NextResponse.next()`, que permite que a requisição continue normalmente
+
+### 4.2 Por que existe?
+- Substituiu o antigo `middleware.ts` (que estava depreciado na versão do Next.js utilizada
+- Migrou para evitar o aviso de depreciação durante o build
+- Mantido como arquivo vazio para preservar a estrutura e permitir adição de funcionalidades futuras
+
+### 4.3 Matcher
+- A configuração `matcher` define quais rotas são interceptadas pelo proxy
+- Exclui arquivos estáticos (imagens, ícones, etc.)
+
+---
+
+## 5. ARQUIVOS IMPORTANTES RELACIONADOS
+
+- `lib/session.ts`: Funções de criação e verificação de tokens
+- `lib/auth.ts`: Logica de autenticação e sessão
+- `app/auth/route.ts`: Rota de autenticação do Simulador Central
+- `lib/auth-actions.ts`: Server actions (logout)
+- `components/dashboard-shell.tsx`: Cabeçalho e layout do dashboard
+- `proxy.ts`: Proxy/middleware (atualmente vazio)
