@@ -321,7 +321,7 @@ export function DrawingCanvas() {
         <div className="fixed inset-0 z-[100] pointer-events-none">
           <canvas
             ref={canvasRef}
-            className={cn('fixed inset-0 block h-screen w-screen pointer-events-auto', activeCursor)}
+            className={cn('fixed inset-0 block h-screen w-screen touch-none pointer-events-auto', activeCursor)}
             onContextMenu={e => { e.preventDefault(); deleteStrokeAtPoint(e.pageX, e.pageY) }}
             onPointerDown={startDrawing}
             onPointerMove={continueDrawing}
@@ -333,7 +333,7 @@ export function DrawingCanvas() {
       )}
 
       {/* Container — FAB + toolbar */}
-      <div className="fixed bottom-6 right-6 z-[200]">
+      <div className="fixed bottom-6 right-6 z-[200]" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
 
         {/* Toolbar vertical — aparece acima do FAB */}
         <div className={cn(
