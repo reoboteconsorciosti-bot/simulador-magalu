@@ -412,8 +412,8 @@ export default function AlavancagemPatrimonialPage() {
                   <span className="text-[13px] font-extrabold text-slate-400 uppercase tracking-wider">TOTAL PAGO CONSÓRCIO</span>
                   <div className="text-xl font-black text-slate-900 tracking-tight leading-tight mt-0.5">{formatCurrency(totalPagoConsorcio)}</div>
                 </div>
-                <div className="bg-white rounded-2xl py-2.5 px-4 shadow-sm flex flex-col justify-center min-h-[62px] border-[2px] border-red-500">
-                  <span className="text-[13px] font-extrabold text-slate-400 uppercase tracking-wider">CUSTO OU LUCRO</span>
+                <div className={`bg-white rounded-2xl py-2.5 px-4 shadow-sm flex flex-col justify-center min-h-[62px] border-[2px] ${isLucro ? 'border-emerald-500' : 'border-red-500'}`}>
+                  <span className={`text-[13px] font-extrabold uppercase tracking-wider ${isLucro ? 'text-emerald-500' : 'text-red-500'}`}>{isLucro ? 'LUCRO' : 'CUSTO'}</span>
                   <div className={`text-xl font-black tracking-tight leading-tight mt-0.5 ${isLucro ? 'text-emerald-600' : 'text-red-600'}`}>
                     {formatCurrency(lucroCustoFinal)}
                   </div>

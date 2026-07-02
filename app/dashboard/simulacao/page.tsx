@@ -360,12 +360,14 @@ export default function SimulacaoPage() {
                     </div>
                     
                     {/* Pós contemplação - Mais destacado */}
-                    <div className="p-8 bg-[#ECFDF5] rounded-xl border-3 border-[#A7F3D0] shadow-xl">
-                      <div className="text-center">
-                        <p className="text-lg text-[#6B7280] mb-3 font-semibold">Pós Contemplação</p>
-                        <p className="text-5xl font-black text-[#059669]">{formatCurrency(results.finalPaymentAfterContemplation)}</p>
+                    {contemplationMonth != null && (
+                      <div className="p-8 bg-[#ECFDF5] rounded-xl border-3 border-[#A7F3D0] shadow-xl">
+                        <div className="text-center">
+                          <p className="text-lg text-[#6B7280] mb-3 font-semibold">Pós Contemplação</p>
+                          <p className="text-5xl font-black text-[#059669]">{formatCurrency(results.finalPaymentAfterContemplation)}</p>
+                        </div>
                       </div>
-                    </div>
+                    )}
                   </div>
                 </>
               ) : (
