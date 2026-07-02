@@ -17,8 +17,6 @@ export default function AlavancagemFinanceiraPage() {
   
   const [saleGainPercent, setSaleGainPercent] = useState<number | null>(20)
   const [installmentType, setInstallmentType] = useState<string>('Meia')
-  const [modality, setModality] = useState<string>('Sorteio')
-
   const results = useMemo(() => {
     if (creditValue !== null && creditValue > 0 && 
         months !== null && months > 0 && 
@@ -31,14 +29,14 @@ export default function AlavancagemFinanceiraPage() {
         taxaTotal,
         saleGainPercent,
         installmentType,
-        modality,
+        modality: 'Sorteio',
         currentMonth: contemplationMonth,
         rentPercent: null,
         contemplationMonth
       })
     }
     return null
-  }, [creditValue, months, incc, taxaTotal, saleGainPercent, installmentType, modality, contemplationMonth])
+  }, [creditValue, months, incc, taxaTotal, saleGainPercent, installmentType, contemplationMonth])
 
   const syncFinSlider = (value: string | undefined) => {
     if (value) {
@@ -121,14 +119,9 @@ export default function AlavancagemFinanceiraPage() {
             {/* Modalidade */}
             <div>
               <label className="block text-sm font-bold text-muted-foreground mb-2">Modalidade</label>
-              <select 
-                value={modality} 
-                onChange={(e) => setModality(e.target.value)}
-                className="w-full bg-background border border-border rounded-lg px-3 py-3 text-sm font-semibold text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
-              >
-                <option value="Sorteio">Sorteio</option>
-                <option value="Lance Fixo">Lance</option>
-              </select>
+              <div className="w-full bg-background border border-border rounded-lg px-3 py-3 text-sm font-semibold text-foreground">
+                Sorteio
+              </div>
             </div>
 
             {/* Mês Contemplação */}

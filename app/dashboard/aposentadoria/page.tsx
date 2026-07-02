@@ -20,7 +20,6 @@ export default function AposentadoriaPage() {
     setSharedField
   } = useSharedSimulationStore()
   
-  const [modality, setModality] = useState<string>('Lance Fixo')
   const [application, setApplication] = useState<number | undefined>(0.9)
 
   const currentMonth = contemplationMonth
@@ -74,7 +73,7 @@ export default function AposentadoriaPage() {
         currentMonth != null) {
       return calculatePrevidenciaAplicada({
         creditValue,
-        modality,
+        modality: 'Sorteio',
         application,
         months,
         incc,
@@ -82,7 +81,7 @@ export default function AposentadoriaPage() {
       })
     }
     return null
-  }, [creditValue, modality, application, months, incc, currentMonth])
+  }, [creditValue, application, months, incc, currentMonth])
 
   const syncApSlider = (value: string) => {
     setSharedField('contemplationMonth', parseFloat(value))
@@ -140,15 +139,9 @@ export default function AposentadoriaPage() {
             {/* Modalidade */}
             <div>
               <label className="block text-xs font-bold text-muted-foreground mb-1.5">Modalidade</label>
-              <select
-                value={modality}
-                onChange={(e) => setModality(e.target.value)}
-                className="w-full bg-background border border-border rounded-lg px-4 py-2.5 text-sm font-semibold text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
-              >
-                <option value="Lance Fixo">Lance Fixo</option>
-                <option value="Lance Fidelidade">Lance Embutido</option>
-                <option value="Sorteio">Sorteio</option>
-              </select>
+              <div className="w-full bg-background border border-border rounded-lg px-4 py-2.5 text-sm font-semibold text-foreground">
+                Sorteio
+              </div>
             </div>
 
             {/* Mês Contemplação */}

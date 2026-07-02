@@ -33,20 +33,9 @@ function calcularLucroVenda(valorVenda: number, totalInvestido: number): number 
   return lucro
 }
 
-function calcularRentabilidadeMensal(valorFinal: number, valorInvestido: number, meses: number): number {
-  console.log('=== Cálculo da Rentabilidade Mensal ===')
-  console.log('Valor Final (recebido na venda):', valorFinal)
-  console.log('Valor Investido:', valorInvestido)
-  console.log('Meses até a contemplação:', meses)
-  
-  if (valorInvestido <= 0 || meses <= 0) {
-    console.log('Rentabilidade Mensal: 0 (valor ou meses inválidos)')
-    return 0
-  }
-  
-  const rentabilidade = (Math.pow(valorFinal / valorInvestido, 1 / meses) - 1) * 100
-  console.log('Rentabilidade Mensal:', rentabilidade + '%')
-  return rentabilidade
+function calcularRentabilidadeMensal(roi: number, meses: number): number {
+  if (meses <= 0) return 0
+  return roi / meses
 }
 
 export function calculateFinancialLeverage(
@@ -112,7 +101,7 @@ export function calculateFinancialLeverage(
   const roi = calculateROI(profit, totalInvested)
   
   // Monthly Return (Rentabilidade Mensal)
-  const monthlyReturn = calcularRentabilidadeMensal(saleValue, totalInvested, currentMonth)
+  const monthlyReturn = calcularRentabilidadeMensal(roi, currentMonth)
   
   // Novos cálculos usando funções compartilhadas
   let parcelaPosContemplacao: number | undefined

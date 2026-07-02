@@ -6,33 +6,33 @@ import { calculatePatrimonialLeverage, calculateSimulation, calculoCreditoContem
 import { useSharedSimulationStore } from '@/lib/store'
 
 export default function AlavancagemPatrimonialPage() {
-  const { 
-    creditValue, 
+  const {
+    creditValue,
     months,
     contemplationMonth,
     taxaTotal,
     incc,
     setSharedField
   } = useSharedSimulationStore()
-  
+
   const [rentPercent, setRentPercent] = useState<number | undefined>(0.7)
   const [correctionIncc, setCorrectionIncc] = useState<number | undefined>(5)
   const [rentIgpPercent, setRentIgpPercent] = useState<number | undefined>(5)
-  const [modality, setModality] = useState<string>('Sorteio')
+  const [aplicacaoMensal, setAplicacaoMensal] = useState<number | undefined>(1)
   const [selectedImovel, setSelectedImovel] = useState<string>('casa')
 
   const results = useMemo(() => {
-    if (creditValue != null && creditValue > 0 && 
-        months != null && months > 0 && 
-        taxaTotal != null &&
-        contemplationMonth != null) {
+    if (creditValue != null && creditValue > 0 &&
+      months != null && months > 0 &&
+      taxaTotal != null &&
+      contemplationMonth != null) {
       return calculatePatrimonialLeverage({
         creditValue,
         months,
         rentPercent: rentPercent ?? 0.7,
         correctionIncc: correctionIncc ?? 5,
         rentIgpPercent: rentIgpPercent ?? 5,
-        modality,
+        modality: 'Sorteio',
         currentMonth: contemplationMonth,
         taxaTotal,
         contemplationMonth,
@@ -40,7 +40,7 @@ export default function AlavancagemPatrimonialPage() {
       })
     }
     return null
-  }, [creditValue, months, rentPercent, correctionIncc, rentIgpPercent, modality, taxaTotal, contemplationMonth, incc])
+  }, [creditValue, months, rentPercent, correctionIncc, rentIgpPercent, taxaTotal, contemplationMonth, incc])
 
   const simulationResults = useMemo(() => {
     if (
@@ -92,13 +92,31 @@ export default function AlavancagemPatrimonialPage() {
   const aluguelInicial = results?.aluguel ?? 0
   const sobrasOuDesembolso = aluguelInicial - parcelaPosContemplacao
   const isSobraInicial = sobrasOuDesembolso >= 0
-  const lucroCustoFinal = alugueisRecebidos > totalPagoConsorcio ? 
-    alugueisRecebidos - totalPagoConsorcio : 
+  const lucroCustoFinal = alugueisRecebidos > totalPagoConsorcio ?
+    alugueisRecebidos - totalPagoConsorcio :
     totalPagoConsorcio - alugueisRecebidos
   const isLucro = alugueisRecebidos > totalPagoConsorcio
   const patrimonioImobiliario = valorAtualizadoImovel
   const rendaPassivaFinal = results?.rendaPassiva ?? 0
   const percentPagoImovel = results?.percentPagoImovel ?? 0
+
+  const patrimonioAcumuladoLucros = (() => {
+    if (prazoRestante <= 0 || !aluguelInicial || !parcelaPosContemplacao || !aplicacaoMensal) return 0
+    const igpm = (rentIgpPercent ?? 5) / 100
+    const inccRate = (correctionIncc ?? 5) / 100
+    const r = aplicacaoMensal / 100
+    let fv = 0
+    for (let i = 1; i <= prazoRestante; i++) {
+      const ano = Math.floor((i - 1) / 12)
+      const aluguelI = aluguelInicial * Math.pow(1 + igpm, ano)
+      const parcelaI = parcelaPosContemplacao * Math.pow(1 + inccRate, ano)
+      const sobraI = aluguelI - parcelaI
+      if (sobraI > 0) {
+        fv += sobraI * Math.pow(1 + r, prazoRestante - i)
+      }
+    }
+    return fv
+  })()
 
   return (
     <div className="min-h-screen bg-background text-foreground p-4 md:px-8 py-6 w-full max-w-full overflow-x-hidden">
@@ -112,7 +130,7 @@ export default function AlavancagemPatrimonialPage() {
         <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
           <span className="text-[11px] font-extrabold uppercase tracking-wider text-muted-foreground block mb-4">DADOS DE OPERAÇÃO (ALTERE OS VALORES PARA SIMULAR)</span>
           <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            
+
             {/* Crédito Original */}
             <div>
               <label className="block text-sm font-bold text-muted-foreground mb-2">Crédito Original</label>
@@ -129,18 +147,12 @@ export default function AlavancagemPatrimonialPage() {
               />
             </div>
 
-            {/* Forma Contemplação */}
+            {/* Modalidade */}
             <div>
-              <label className="block text-sm font-bold text-muted-foreground mb-2">Forma Contemplação</label>
-              <select
-                value={modality}
-                onChange={(e) => setModality(e.target.value)}
-                className="w-full bg-background border border-border rounded-lg px-3 py-3 text-sm font-semibold text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
-              >
-                <option value="Sorteio">Sorteio</option>
-                <option value="Lance Fixo">Lance Fixo</option>
-                <option value="Lance Fidelidade">Lance Livre</option>
-              </select>
+              <label className="block text-sm font-bold text-muted-foreground mb-2">Modalidade</label>
+              <div className="w-full bg-background border border-border rounded-lg px-3 py-3 text-sm font-semibold text-foreground">
+                Sorteio
+              </div>
             </div>
 
             {/* Mês Contemplação */}
@@ -198,6 +210,21 @@ export default function AlavancagemPatrimonialPage() {
                 className="w-full bg-background border border-border rounded-lg px-3 py-3 text-sm font-semibold text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
               />
             </div>
+
+            {/* % Aplicação Mensal das Sobras */}
+            <div>
+              <label className="block text-sm font-bold text-muted-foreground mb-2">% Aplicação Sobras/Mês</label>
+              <NumericFormat
+                value={aplicacaoMensal}
+                onValueChange={(values) => setAplicacaoMensal(values.floatValue || undefined)}
+                thousandSeparator="."
+                decimalSeparator=","
+                suffix="%"
+                decimalScale={2}
+                allowNegative={false}
+                className="w-full bg-background border border-border rounded-lg px-3 py-3 text-sm font-semibold text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
+              />
+            </div>
           </div>
         </div>
 
@@ -215,14 +242,14 @@ export default function AlavancagemPatrimonialPage() {
               {/* Custom slider track */}
               <div className="w-full h-2 bg-muted rounded-lg relative">
                 {/* Filled portion */}
-                <div 
+                <div
                   className="absolute h-full bg-[#f59e0b] rounded-lg transition-all duration-300 ease-out"
                   style={{ width: `${((contemplationMonth || 1) / (months || 220)) * 100}%` }}
                 />
 
                 {/* Custom thumb with number */}
-                <div 
-                  className="absolute top-1/2 transform -translate-x-1/2 -translate-y-1/2 flex flex-col items-center transition-all duration-300 ease-out z-10" 
+                <div
+                  className="absolute top-1/2 transform -translate-x-1/2 -translate-y-1/2 flex flex-col items-center transition-all duration-300 ease-out z-10"
                   style={{ left: `${((contemplationMonth || 1) / (months || 220)) * 100}%` }}
                 >
                   <div className="relative w-11 h-11 rounded-full flex items-center justify-center shadow-md border-2 border-[#f59e0b]">
@@ -233,12 +260,12 @@ export default function AlavancagemPatrimonialPage() {
               </div>
 
               {/* Hidden range input for interaction */}
-              <input 
-                type="range" 
-                min="1" 
-                max={months || 220} 
-                value={contemplationMonth || 1} 
-                onInput={(e: React.InputEvent<HTMLInputElement>) => syncPatInput((e.target as HTMLInputElement).value)} 
+              <input
+                type="range"
+                min="1"
+                max={months || 220}
+                value={contemplationMonth || 1}
+                onInput={(e: React.InputEvent<HTMLInputElement>) => syncPatInput((e.target as HTMLInputElement).value)}
                 className="absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer z-20"
               />
 
@@ -254,7 +281,7 @@ export default function AlavancagemPatrimonialPage() {
 
           {/* Fluxo Dinâmico Horizontal */}
           <div className="grid grid-cols-1 justify-items-center gap-4 xl:grid-cols-2 2xl:flex 2xl:flex-row 2xl:items-center 2xl:justify-between">
-            
+
             {/* Passo 01 */}
             <div className="w-full xl:w-auto xl:shrink-0 flex justify-center">
               <div className="w-[340px] h-[560px] bg-[#1b54b8] text-white rounded-[24px] p-5 shadow-2xl flex flex-col justify-start">
@@ -340,7 +367,7 @@ export default function AlavancagemPatrimonialPage() {
                 </div>
                 <div className="bg-white rounded-2xl py-2.5 px-4 shadow-sm flex flex-col justify-center min-h-[62px]">
                   <span className="text-[13px] font-extrabold text-slate-400 uppercase tracking-wider">VALOR IMÓVEL</span>
-                  <div className="text-xl font-black text-[#e07a1b] tracking-tight leading-tight mt-0.5">{formatCurrency(valorAtualizadoImovel)}</div>
+                  <div className="text-xl font-black text-[#e07a1b] tracking-tight leading-tight mt-0.5">{formatCurrency(creditoContemplado)}</div>
                 </div>
                 <div className="bg-white rounded-2xl py-2.5 px-4 shadow-sm flex flex-col justify-center min-h-[62px]">
                   <span className="text-[13px] font-extrabold text-slate-400 uppercase tracking-wider">ALUGUEL INICIAL</span>
@@ -374,7 +401,7 @@ export default function AlavancagemPatrimonialPage() {
               </div>
               <div className="flex flex-col gap-2.5 mt-4">
                 <div className="bg-white rounded-2xl py-2.5 px-4 shadow-sm flex flex-col justify-center min-h-[62px]">
-                  <span className="text-[13px] font-extrabold text-slate-400 uppercase tracking-wider">CRED. CONT</span>
+                  <span className="text-[13px] font-extrabold text-slate-400 uppercase tracking-wider">VALOR IMÓV ATUALIZADO</span>
                   <div className="text-xl font-black text-slate-900 tracking-tight leading-tight mt-0.5">{formatCurrency(valorAtualizadoImovel)}</div>
                 </div>
                 <div className="bg-white rounded-2xl py-2.5 px-4 shadow-sm flex flex-col justify-center min-h-[62px]">
@@ -430,6 +457,19 @@ export default function AlavancagemPatrimonialPage() {
                   <span className="text-[13px] font-bold text-emerald-100 uppercase tracking-wider">Renda Passiva</span>
                   <div className="text-2xl font-black text-white tracking-tight mt-1">{formatCurrency(rendaPassivaFinal)}</div>
                 </div>
+                {/* Patrim Acumulado dos Lucros (só aparece se houver sobra positiva) */}
+                {isSobraInicial && patrimonioAcumuladoLucros > 0 && !!aplicacaoMensal && (
+                  <>
+                    <div className="w-full bg-white text-slate-500 rounded-xl py-3 px-4 flex items-center justify-start shadow-inner">
+                      <span className="text-[13px] font-black leading-none">+</span>
+                    </div>
+                    <div className="bg-[#0e9f6e] rounded-2xl p-4 shadow-md flex flex-col gap-0.5">
+                      <span className="text-[13px] font-bold text-emerald-100 uppercase tracking-wider">Reserva Financeira Gerada</span>
+                      <div className="text-2xl font-black text-white tracking-tight mt-1">{formatCurrency(patrimonioAcumuladoLucros)}</div>
+
+                    </div>
+                  </>
+                )}
               </div>
               <div className="flex-1" />
             </div>
