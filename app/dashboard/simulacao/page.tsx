@@ -67,7 +67,7 @@ export default function SimulacaoPage() {
         clientName,   
         creditValue,
         months,
-        contemplationMonth: contemplationMonth ?? undefined,
+        contemplationMonth: contemplationMonth ?? 0,
         incc: incc ?? 0,
         lanceEmbutido: lanceEmbutido ?? 0,
         taxaTotal,
