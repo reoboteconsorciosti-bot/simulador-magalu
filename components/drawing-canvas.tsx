@@ -328,7 +328,7 @@ export function DrawingCanvas() {
           {/* Overlay: captura eventos de caneta/mouse, deixa toque do dedo passar */}
           <div
             ref={overlayRef}
-            className={cn('fixed inset-0 z-[101] pointer-events-auto', activeCursor)}
+            className={cn('fixed inset-0 z-[101] touch-none pointer-events-auto', activeCursor)}
             onContextMenu={e => { e.preventDefault(); deleteStrokeAtPoint(e.pageX, e.pageY) }}
             onPointerDown={startDrawing}
             onPointerMove={continueDrawing}
@@ -340,7 +340,7 @@ export function DrawingCanvas() {
       )}
 
       {/* Container — FAB + toolbar */}
-      <div className="fixed bottom-6 right-6 z-[200]" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
+      <div className="fixed bottom-6 right-6 z-[500]" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
 
         {/* Toolbar vertical — aparece acima do FAB */}
         <div className={cn(
