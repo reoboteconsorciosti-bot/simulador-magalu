@@ -40,8 +40,10 @@ export default function AlavancagemFinanceiraPage() {
     return null
   }, [creditValue, months, incc, taxaTotal, saleGainPercent, installmentType, modality, contemplationMonth])
 
-  const syncFinSlider = (value: string) => {
-    setSharedField('contemplationMonth', parseFloat(value))
+  const syncFinSlider = (value: string | undefined) => {
+    if (value) {
+      setSharedField('contemplationMonth', parseFloat(value))
+    }
   }
 
   const syncFinInput = (value: string) => {
@@ -111,7 +113,7 @@ export default function AlavancagemFinanceiraPage() {
                 onChange={(e) => setInstallmentType(e.target.value)}
                 className="w-full bg-background border border-border rounded-lg px-3 py-3 text-sm font-semibold text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
               >
-                <option value="Meia">Meia Parcela</option>
+                <option value="Meia">Parcela Reduzida</option>
                 <option value="Cheia">Parcela Cheia</option>
               </select>
             </div>
@@ -134,7 +136,7 @@ export default function AlavancagemFinanceiraPage() {
               <label className="block text-sm font-bold text-muted-foreground mb-2">Mês Contemplação</label>
               <NumericFormat
                 value={contemplationMonth}
-                onValueChange={(values) => syncFinSlider(values.floatValue?.toString() ?? '1')}
+                onValueChange={(values) => syncFinSlider(values.floatValue?.toString())}
                 allowNegative={false}
                 decimalScale={0}
                 min={1}
