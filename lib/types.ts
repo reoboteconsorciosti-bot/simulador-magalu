@@ -20,6 +20,7 @@ export interface Simulation {
   incc: number
   lanceEmbutido: number
   taxaTotal: number
+  tipoReducao: string
   totalValue: number
   feeValue: number
   monthlyFee: number
@@ -44,6 +45,7 @@ export interface SimulationInput {
   incc?: number
   lanceEmbutido?: number
   taxaTotal: number
+  tipoReducao?: string
 }
 
 export interface SimulationResult {
@@ -71,6 +73,7 @@ export interface LeverageFinancialInput {
   currentMonth: number;
   rentPercent?: number | null; // Novo campo para percentual de aluguel
   contemplationMonth?: number | null; // Novo campo para mês de contemplação
+  tipoReducao?: string; // Modalidade: "fundo-comum" ou "meia-parcela"
 }
 
 export interface LeverageFinancialResult {
@@ -98,6 +101,7 @@ export interface LeveragePatrimonialInput {
   taxaTotal: number;
   contemplationMonth: number;
   incc?: number;
+  tipoReducao?: string; // Modalidade: "fundo-comum" ou "meia-parcela"
 }
 
 export interface AmortizationRow {

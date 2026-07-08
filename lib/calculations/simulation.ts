@@ -6,6 +6,13 @@ function calcularFundoComum(credito: number, prazo: number): number {
   return credito / prazo
 }
 
+// Calcula a meia parcela conforme a lógica do usuário
+export function calcularMeiaParcela(credito: number, taxaTotal: number, prazo: number): number {
+  const totalComTaxa = credito * (1 + taxaTotal / 100)
+  const parcelaIntegral = totalComTaxa / prazo
+  return parcelaIntegral / 2
+}
+
 // 2. Calcula a taxa mensal (usando taxaTotal)
 function calcularTaxaMensal(credito: number, taxaTotal: number, prazo: number): number {
   const totalTaxa = credito * (taxaTotal / 100)
@@ -243,7 +250,7 @@ export function calcularPagamentosPosContemplacaoAjustada(
 }
 
 export function calculateSimulation(input: SimulationInput): SimulationResult {
-  const { creditValue, months, contemplationMonth, taxaTotal, incc = 5 } = input
+  const { creditValue, months, contemplationMonth, taxaTotal, incc = 5, tipoReducao = 'meia-parcela' } = input
   
   // Step 1: Total Value with Fee
   const totalValue = creditValue * (1 + taxaTotal / 100)
@@ -256,51 +263,66 @@ export function calculateSimulation(input: SimulationInput): SimulationResult {
   
   // Step 4: Gross Monthly Installment
   const grossInstallment = calcularFundoComum(creditValue, months)
-  const firstInitialPayment = calcularParcelaInicial(creditValue, months, taxaTotal)
   
   // Using the month of contemplation from input or default (half the term)
   const mesContemplacaoUsado = contemplationMonth ?? Math.floor(months / 2)
 
-  // Step 5: Meia parcela com reajuste anual separado para fundo comum e taxa
-  const {
-    pagamentos: pagamentosPreContemplacao,
-    ultimaParcela: finalPayment,
-    ultimoFundoComumPago,
-    ultimaTaxaAdministracaoPaga,
-    totalInvestidoFundoComum,
-  } =
-    calcularPagamentosMeiaParcelaAjustada(
-      creditValue,
-      months,
-      taxaTotal,
-      incc,
-      mesContemplacaoUsado
-    )
+  let firstInitialPayment: number
+  let finalPayment: number
+  let finalPaymentAfterContemplation: number
+  let parcelaPosContemplacaoAjustada: number
+  let amortizacaoAjustada: number[]
+  let totalPaid: number
 
-  const finalPaymentAfterContemplation = calcularPosContemplacao(
-    creditValue,
-    months,
-    taxaTotal,
-    mesContemplacaoUsado,
-    incc
-  )
+  if (tipoReducao === 'fundo-comum') {
+    // Lógica para Fundo Comum (mantida como original)
+    firstInitialPayment = calcularParcelaInicial(creditValue, months, taxaTotal)
+    
+    const {
+      pagamentos: pagamentosPreContemplacao,
+      ultimaParcela,
+    } = calcularPagamentosMeiaParcelaAjustada(
+      creditValue, months, taxaTotal, incc, mesContemplacaoUsado)
+    finalPayment = ultimaParcela
 
-  // Step 7: Pós-contemplação aplica reajuste anual sobre a parcela integral
-  const {
-    parcelaIntegral: _parcelaIntegralBase,
-    pagamentos: amortizacaoAjustada,
-    ultimaParcela: parcelaAjustada,
-  } = calcularPagamentosPosContemplacaoAjustada(
-    finalPaymentAfterContemplation,
-    months,
-    mesContemplacaoUsado,
-    incc,
-  )
-  
-  // Total Paid (soma todos os pagamentos pré e pós contemplação)
-  const totalPagoPreContemplacao = pagamentosPreContemplacao.reduce((acc, val) => acc + val, 0)
-  const totalPagoPosContemplacao = amortizacaoAjustada.reduce((acc, val) => acc + val, 0)
-  const totalPaid = totalPagoPreContemplacao + totalPagoPosContemplacao
+    finalPaymentAfterContemplation = calcularPosContemplacao(
+      creditValue, months, taxaTotal, mesContemplacaoUsado, incc)
+
+    const { pagamentos, ultimaParcela: parcelaAjustada } = calcularPagamentosPosContemplacaoAjustada(
+      finalPaymentAfterContemplation, months, mesContemplacaoUsado, incc)
+    amortizacaoAjustada = pagamentos
+    parcelaPosContemplacaoAjustada = parcelaAjustada
+
+    const totalPagoPreContemplacao = pagamentosPreContemplacao.reduce((acc, val) => acc + val, 0)
+    const totalPagoPosContemplacao = amortizacaoAjustada.reduce((acc, val) => acc + val, 0)
+    totalPaid = totalPagoPreContemplacao + totalPagoPosContemplacao
+
+  } else {
+    // Lógica para Meia Parcela usando a nova regra
+    firstInitialPayment = calcularMeiaParcela(creditValue, taxaTotal, months)
+    
+    // Pre-contemplação: pagamentos de meia parcela até o mês de contemplação
+    const {
+      pagamentos: pagamentosPreContemplacao,
+      ultimaParcela,
+    } = calcularPagamentosPeriodo(firstInitialPayment, incc, mesContemplacaoUsado)
+    finalPayment = ultimaParcela
+    
+    // Pós-contemplação: valor é a parcela integral (meia parcela * 2)
+    const totalComTaxa = creditValue * (1 + taxaTotal / 100)
+    const parcelaIntegral = totalComTaxa / months
+    finalPaymentAfterContemplation = parcelaIntegral
+
+    // Pagamentos pós-contemplação (com reajuste anual
+    const { pagamentos, ultimaParcela: parcelaAjustada } = calcularPagamentosPosContemplacaoAjustada(
+      finalPaymentAfterContemplation, months, mesContemplacaoUsado, incc)
+    amortizacaoAjustada = pagamentos
+    parcelaPosContemplacaoAjustada = parcelaAjustada
+
+    const totalPagoPreContemplacao = pagamentosPreContemplacao.reduce((acc, val) => acc + val, 0)
+    const totalPagoPosContemplacao = amortizacaoAjustada.reduce((acc, val) => acc + val, 0)
+    totalPaid = totalPagoPreContemplacao + totalPagoPosContemplacao
+  }
   
   return {
     totalValue,
@@ -312,7 +334,7 @@ export function calculateSimulation(input: SimulationInput): SimulationResult {
     finalPaymentAfterContemplation,
     totalPaid,
     contemplationMonth: mesContemplacaoUsado,
-    parcelaPosContemplacaoAjustada: parcelaAjustada,
+    parcelaPosContemplacaoAjustada,
     amortizacaoAjustada,
   }
 }

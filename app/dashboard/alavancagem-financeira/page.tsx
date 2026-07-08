@@ -12,6 +12,7 @@ export default function AlavancagemFinanceiraPage() {
     incc,
     taxaTotal,
     contemplationMonth,
+    tipoReducao,
     setSharedField,
   } = useSharedSimulationStore()
   
@@ -32,11 +33,12 @@ export default function AlavancagemFinanceiraPage() {
         modality: 'Sorteio',
         currentMonth: contemplationMonth,
         rentPercent: null,
-        contemplationMonth
+        contemplationMonth,
+        tipoReducao
       })
     }
     return null
-  }, [creditValue, months, incc, taxaTotal, saleGainPercent, installmentType, contemplationMonth])
+  }, [creditValue, months, incc, taxaTotal, saleGainPercent, installmentType, contemplationMonth, tipoReducao])
 
   const syncFinSlider = (value: string | undefined) => {
     if (value) {

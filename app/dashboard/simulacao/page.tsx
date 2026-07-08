@@ -8,6 +8,13 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { toast } from 'sonner'
 import { Save, FileDown, RotateCcw, CreditCard, BarChart3, Calendar, CheckCircle, Wallet } from 'lucide-react'
 import { generateSimulationPDF } from '@/lib/pdf'
@@ -30,6 +37,7 @@ export default function SimulacaoPage() {
     incc, 
     lanceEmbutido, 
     taxaTotal,
+    tipoReducao,
     isLoading,
     setSharedField,
     clearSharedFields
@@ -71,10 +79,11 @@ export default function SimulacaoPage() {
         incc: incc ?? 0,
         lanceEmbutido: lanceEmbutido ?? 0,
         taxaTotal,
+        tipoReducao,
       })
     }
     return null
-  }, [clientName, creditValue, months, contemplationMonth, incc, lanceEmbutido, taxaTotal])
+  }, [clientName, creditValue, months, contemplationMonth, incc, lanceEmbutido, taxaTotal, tipoReducao])
 
   const handleSave = () => {
     if (!clientName.trim()) {
@@ -98,6 +107,7 @@ export default function SimulacaoPage() {
         incc: incc ?? 0,
         lanceEmbutido: lanceEmbutido ?? 0,
         taxaTotal,
+        tipoReducao,
         totalValue: results.totalValue,
         feeValue: results.feeValue,
         monthlyFee: results.monthlyFee,
@@ -140,6 +150,7 @@ export default function SimulacaoPage() {
         incc: incc ?? 0,
         lanceEmbutido: lanceEmbutido ?? 0,
         taxaTotal,
+        tipoReducao,
         totalValue: results.totalValue,
         feeValue: results.feeValue,
         monthlyFee: results.monthlyFee,
@@ -165,6 +176,7 @@ export default function SimulacaoPage() {
         incc: incc ?? 0,
         lanceEmbutido: lanceEmbutido ?? 0,
         taxaTotal,
+        tipoReducao,
         results,
         user,
       })
@@ -316,6 +328,23 @@ export default function SimulacaoPage() {
                 allowNegative={false}
                 placeholder="0,00%"
               />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="tipoReducao">Modalidade</Label>
+              <Select
+                key={`tipoReducao-${clearKey}`}
+                value={tipoReducao}
+                onValueChange={(value) => setSharedField('tipoReducao', value)}
+              >
+                <SelectTrigger id="tipoReducao">
+                  <SelectValue placeholder="Selecione a modalidade" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="fundo-comum">Fundo Comum</SelectItem>
+                  <SelectItem value="meia-parcela">Meia Parcela</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Seller Info */}

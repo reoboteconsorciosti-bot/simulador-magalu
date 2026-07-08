@@ -51,7 +51,8 @@ export function calculateFinancialLeverage(
     modality, 
     currentMonth,
     rentPercent,
-    contemplationMonth
+    contemplationMonth,
+    tipoReducao
   } = input
   
   // Use defaults if null
@@ -116,7 +117,8 @@ export function calculateFinancialLeverage(
       contemplationMonth,
       incc: inccValue,
       lanceEmbutido: 0,
-      taxaTotal: taxaTotalValue
+      taxaTotal: taxaTotalValue,
+      tipoReducao
     })
     
     if (rentPercent) {

@@ -103,7 +103,7 @@ function calcularRendaPassivaFinal(
 export function calculatePatrimonialLeverage(
   input: LeveragePatrimonialInput
 ): LeveragePatrimonialResult {
-  const { creditValue, months, rentPercent, correctionIncc, rentIgpPercent, currentMonth, taxaTotal, contemplationMonth, incc } = input
+  const { creditValue, months, rentPercent, correctionIncc, rentIgpPercent, currentMonth, taxaTotal, contemplationMonth, incc, tipoReducao } = input
   
   // Monthly installment
   const monthlyInstallment = calculateMonthlyInstallment(creditValue, months)

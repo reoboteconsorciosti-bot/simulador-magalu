@@ -12,6 +12,7 @@ interface SharedSimulationState {
   incc: number | null
   lanceEmbutido: number | null
   taxaTotal: number | null
+  tipoReducao: string
   isLoading: boolean
   setSharedField: <K extends keyof SharedSimulationState>(key: K, value: SharedSimulationState[K]) => void
   clearSharedFields: () => void
@@ -146,6 +147,7 @@ export const useSharedSimulationStore = create<SharedSimulationState>()(
       incc: 5,
       lanceEmbutido: null,
       taxaTotal: null,
+      tipoReducao: 'meia-parcela',
       isLoading: false,
       setSharedField: (key, value) => {
         console.log(`Atualizando campo ${key}:`, value)
@@ -162,6 +164,7 @@ export const useSharedSimulationStore = create<SharedSimulationState>()(
           incc: 5,
           lanceEmbutido: null,
           taxaTotal: null,
+          tipoReducao: 'meia-parcela',
           isLoading: false,
         }))
       },

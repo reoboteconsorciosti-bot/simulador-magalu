@@ -14,12 +14,13 @@ interface GeneratePDFParams {
   incc: number
   lanceEmbutido: number
   taxaTotal: number
+  tipoReducao: string
   results: SimulationResult
   user: User
 }
 
 export function generateSimulationPDF(params: GeneratePDFParams) {
-  const { clientName, creditValue, months, contemplationMonth, incc, lanceEmbutido, taxaTotal, results, user } = params
+  const { clientName, creditValue, months, contemplationMonth, incc, lanceEmbutido, taxaTotal, tipoReducao, results, user } = params
   const doc = new jsPDF()
   const pageWidth = doc.internal.pageSize.getWidth()
   
@@ -69,6 +70,7 @@ export function generateSimulationPDF(params: GeneratePDFParams) {
       ['Valor do Crédito', formatCurrency(creditValue)],
       ['Prazo do Grupo', `${months} meses`],
       ['Mês de Contemplação', `${contemplationMonth} meses`],
+      ['Modalidade', tipoReducao === 'meia-parcela' ? 'Meia Parcela' : 'Fundo Comum'],
       ['INCC', `${incc.toFixed(2).replace('.', ',')}%`],
       ['Lance Embutido', `${lanceEmbutido.toFixed(2).replace('.', ',')}%`],
       ['Taxa Total', `${taxaTotal.toFixed(2).replace('.', ',')}%`],

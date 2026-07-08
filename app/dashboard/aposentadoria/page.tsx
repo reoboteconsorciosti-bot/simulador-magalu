@@ -17,6 +17,7 @@ export default function AposentadoriaPage() {
     incc,
     taxaTotal,
     contemplationMonth,
+    tipoReducao,
     setSharedField
   } = useSharedSimulationStore()
   
@@ -39,10 +40,11 @@ export default function AposentadoriaPage() {
         contemplationMonth: contemplationMonth ?? undefined,
         incc: incc ?? 5,
         taxaTotal,
+        tipoReducao
       })
     }
     return null
-  }, [creditValue, months, contemplationMonth, incc, taxaTotal])
+  }, [creditValue, months, contemplationMonth, incc, taxaTotal, tipoReducao])
 
   // Calcula a simulação com currentMonth como mês de contemplação para pegar o total investido completo
   const totalInvestidoResults = useMemo(() => {
@@ -60,10 +62,11 @@ export default function AposentadoriaPage() {
         contemplationMonth: currentMonth,
         incc: incc ?? 5,
         taxaTotal,
+        tipoReducao
       })
     }
     return null
-  }, [creditValue, months, currentMonth, incc, taxaTotal])
+  }, [creditValue, months, currentMonth, incc, taxaTotal, tipoReducao])
 
   const results = useMemo(() => {
     if (creditValue != null && creditValue > 0 && 
