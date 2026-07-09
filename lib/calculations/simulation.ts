@@ -59,6 +59,94 @@ export function calcularComponentesMeiaParcela(
   }
 }
 
+// Função para calcular componentes de Meia Parcela (redução em ambos)
+export function calcularComponentesMeiaParcelaTotal(
+  credito: number,
+  prazo: number,
+  taxaTotal: number
+): { fundoComum: number; taxaAdministracao: number } {
+  const totalComTaxa = credito * (1 + taxaTotal / 100)
+  const parcelaIntegral = totalComTaxa / prazo
+  const parcelaMeia = parcelaIntegral / 2
+  
+  const fundoComum = credito / prazo / 2
+  const taxaAdministracao = (credito * taxaTotal / 100) / prazo / 2
+  
+  return {
+    fundoComum,
+    taxaAdministracao,
+  }
+}
+
+// Função para calcular pagamentos pré-contemplação para Meia Parcela
+export function calcularPagamentosMeiaParcelaTotalAjustada(
+  credito: number,
+  prazo: number,
+  taxaTotal: number,
+  correctionIncc: number,
+  mesContemplacao: number,
+): {
+  pagamentos: number[]
+  ultimaParcela: number
+  ultimoFundoComumPago: number
+  ultimaTaxaAdministracaoPaga: number
+  totalInvestidoFundoComum: number
+} {
+  const { fundoComum, taxaAdministracao } = calcularComponentesMeiaParcelaTotal(
+    credito,
+    prazo,
+    taxaTotal
+  )
+
+  const pagamentos: number[] = []
+  if (!mesContemplacao || mesContemplacao <= 0) {
+    return {
+      pagamentos,
+      ultimaParcela: fundoComum + taxaAdministracao,
+      ultimoFundoComumPago: fundoComum,
+      ultimaTaxaAdministracaoPaga: taxaAdministracao,
+      totalInvestidoFundoComum: 0,
+    }
+  }
+
+  let fundoAtual = fundoComum
+  let taxaAtual = taxaAdministracao
+  let ultimoFundoComumPago = fundoComum
+  let ultimaTaxaAdministracaoPaga = taxaAdministracao
+  let totalInvestidoFundoComum = 0
+  const maxMeses = Math.min(mesContemplacao, 1000)
+
+  for (let mes = 1; mes <= maxMeses; mes++) {
+    if (mes % 12 === 0) {
+      fundoAtual = fundoAtual * (1 + correctionIncc / 100)
+      taxaAtual = taxaAtual * (1 + correctionIncc / 100)
+    }
+    pagamentos.push(fundoAtual + taxaAtual)
+    ultimoFundoComumPago = fundoAtual
+    ultimaTaxaAdministracaoPaga = taxaAtual
+    totalInvestidoFundoComum += fundoAtual
+  }
+
+  return {
+    pagamentos,
+    ultimaParcela: pagamentos[pagamentos.length - 1] ?? (fundoComum + taxaAdministracao),
+    ultimoFundoComumPago,
+    ultimaTaxaAdministracaoPaga,
+    totalInvestidoFundoComum,
+  }
+}
+
+// Função para calcular parcela integral para Meia Parcela
+export function calcularParcelaIntegralMeiaParcela(
+  fundoComumMeiaParcelaReajustado: number,
+  taxaAdministracaoReajustada: number,
+  ajusteAmortizacao: number
+): number {
+  const fundoComumIntegral = fundoComumMeiaParcelaReajustado * 2
+  const taxaAdministracaoIntegral = taxaAdministracaoReajustada * 2
+  return fundoComumIntegral + taxaAdministracaoIntegral + ajusteAmortizacao
+}
+
 // 4.1 Calcula o ajuste de amortização
 export function calcularAjusteAmortizacao(
   credito: number,
@@ -140,10 +228,10 @@ export function calcularPagamentosPeriodo(
   const maxMeses = Math.min(mesesPeriodo, 1000)
   
   for (let mes = 1; mes <= maxMeses; mes++) {
-    pagamentos.push(parcelaAtual)
     if (mes % 12 === 0) {
       parcelaAtual = parcelaAtual * (1 + taxaIncc / 100)
     }
+    pagamentos.push(parcelaAtual)
   }
   
   return {
@@ -190,15 +278,14 @@ export function calcularPagamentosMeiaParcelaAjustada(
   const maxMeses = Math.min(mesContemplacao, 1000)
 
   for (let mes = 1; mes <= maxMeses; mes++) {
-    pagamentos.push(fundoAtual + taxaAtual)
-    ultimoFundoComumPago = fundoAtual
-    ultimaTaxaAdministracaoPaga = taxaAtual
-    totalInvestidoFundoComum += fundoAtual
-
     if (mes % 12 === 0) {
       fundoAtual = fundoAtual * (1 + correctionIncc / 100)
       taxaAtual = taxaAtual * (1 + correctionIncc / 100)
     }
+    pagamentos.push(fundoAtual + taxaAtual)
+    ultimoFundoComumPago = fundoAtual
+    ultimaTaxaAdministracaoPaga = taxaAtual
+    totalInvestidoFundoComum += fundoAtual
   }
 
   return {
@@ -229,23 +316,51 @@ export function calcularParcelaIntegral(
   return fundoComumIntegral + taxaAdministracaoReajustada + ajusteAmortizacao
 }
 
+// Helper function to calculate the additional monthly increment for Meia Parcela
+function calcularIncrementoMeiaParcela(
+  meiaParcelaInicial: number,
+  mesContemplacao: number,
+  prazoTotal: number
+): number {
+  if (!mesContemplacao || mesContemplacao <= 0 || prazoTotal <= mesContemplacao) return 0
+  const R = meiaParcelaInicial * mesContemplacao
+  const prazoRestante = prazoTotal - mesContemplacao
+  const X = R / prazoRestante
+  const incrementoMensal = X / mesContemplacao
+  return incrementoMensal
+}
+
 export function calcularPagamentosPosContemplacaoAjustada(
   parcelaIntegral: number,
   prazo: number,
   mesContemplacao: number,
-  correctionIncc: number
+  correctionIncc: number,
+  meiaParcelaInicial?: number
 ): { parcelaIntegral: number; pagamentos: number[]; ultimaParcela: number } {
   const mesesRestantes = Math.max(0, prazo - mesContemplacao)
-  const { pagamentos, ultimaParcela } = calcularPagamentosPeriodo(
-    parcelaIntegral,
-    correctionIncc,
-    mesesRestantes
-  )
+  const incrementoMensal = meiaParcelaInicial 
+    ? calcularIncrementoMeiaParcela(meiaParcelaInicial, mesContemplacao, prazo)
+    : 0
+  
+  const pagamentos: number[] = []
+  let parcelaAtual = parcelaIntegral
+  const maxMeses = Math.min(mesesRestantes, 1000)
+  
+  for (let mes = 1; mes <= maxMeses; mes++) {
+    // First, add the monthly increment
+    parcelaAtual += incrementoMensal
+    // Then, check if we need to apply the annual INCC adjustment
+    if (mes % 12 === 0) {
+      parcelaAtual = parcelaAtual * (1 + correctionIncc / 100)
+    }
+    // Then, add this month's installment to the list
+    pagamentos.push(parcelaAtual)
+  }
 
   return {
     parcelaIntegral,
     pagamentos,
-    ultimaParcela,
+    ultimaParcela: pagamentos[pagamentos.length - 1] ?? parcelaAtual,
   }
 }
 
@@ -292,6 +407,8 @@ export function calculateSimulation(input: SimulationInput): SimulationResult {
       finalPaymentAfterContemplation, months, mesContemplacaoUsado, incc)
     amortizacaoAjustada = pagamentos
     parcelaPosContemplacaoAjustada = parcelaAjustada
+    // Use o primeiro pagamento da amortização ajustada como o valor inicial pós contemplação
+    finalPaymentAfterContemplation = pagamentos[0] ?? finalPaymentAfterContemplation
 
     const totalPagoPreContemplacao = pagamentosPreContemplacao.reduce((acc, val) => acc + val, 0)
     const totalPagoPosContemplacao = amortizacaoAjustada.reduce((acc, val) => acc + val, 0)
@@ -308,19 +425,25 @@ export function calculateSimulation(input: SimulationInput): SimulationResult {
     } = calcularPagamentosPeriodo(firstInitialPayment, incc, mesContemplacaoUsado)
     finalPayment = ultimaParcela
     
-    // Pós-contemplação: valor é a parcela integral (meia parcela * 2)
+    // Pós-contemplação: valor é a parcela integral (meia parcela * 2) com ajuste INCC anual até o mês de contemplação
     const totalComTaxa = creditValue * (1 + taxaTotal / 100)
-    const parcelaIntegral = totalComTaxa / months
-    finalPaymentAfterContemplation = parcelaIntegral
+    const parcelaIntegralBase = totalComTaxa / months
+    const parcelaIntegralInicial = aplicarReajusteAnual(parcelaIntegralBase, mesContemplacaoUsado, incc / 100)
 
-    // Pagamentos pós-contemplação (com reajuste anual
+    // Pagamentos pós-contemplação (com reajuste anual e o novo incremento mensal - for display)
     const { pagamentos, ultimaParcela: parcelaAjustada } = calcularPagamentosPosContemplacaoAjustada(
-      finalPaymentAfterContemplation, months, mesContemplacaoUsado, incc)
+      parcelaIntegralInicial, months, mesContemplacaoUsado, incc, firstInitialPayment)
     amortizacaoAjustada = pagamentos
     parcelaPosContemplacaoAjustada = parcelaAjustada
+    // Use o primeiro pagamento da amortização ajustada como o valor inicial pós contemplação
+    finalPaymentAfterContemplation = pagamentos[0] ?? parcelaIntegralInicial
+
+    // Pagamentos pós-contemplação without increment (for totalPaid calculation, same logic as fundo comum)
+    const { pagamentos: pagamentosSemIncremento } = calcularPagamentosPosContemplacaoAjustada(
+      parcelaIntegralInicial, months, mesContemplacaoUsado, incc, undefined)
 
     const totalPagoPreContemplacao = pagamentosPreContemplacao.reduce((acc, val) => acc + val, 0)
-    const totalPagoPosContemplacao = amortizacaoAjustada.reduce((acc, val) => acc + val, 0)
+    const totalPagoPosContemplacao = pagamentosSemIncremento.reduce((acc, val) => acc + val, 0)
     totalPaid = totalPagoPreContemplacao + totalPagoPosContemplacao
   }
   

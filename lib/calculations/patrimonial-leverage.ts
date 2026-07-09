@@ -5,6 +5,9 @@ import {
   calcularParcelaIntegral,
   calcularPagamentosMeiaParcelaAjustada,
   calcularPagamentosPosContemplacaoAjustada,
+  calcularPagamentosMeiaParcelaTotalAjustada,
+  calcularParcelaIntegralMeiaParcela,
+  calcularMeiaParcela,
 } from './simulation'
 import { calcularPagoImovel } from './leverage-helpers'
 
@@ -121,18 +124,38 @@ export function calculatePatrimonialLeverage(
   // Alugueis Recebidos com reajuste anual de IGP-M
   const alugueisRecebidos = calcularTotalAlugueis(aluguel, rentIgpPercent, prazoRestanteMeses)
   
-  const {
-    pagamentos: pagamentosPreContemplacao,
-    ultimoFundoComumPago,
-    ultimaTaxaAdministracaoPaga,
-    totalInvestidoFundoComum,
-  } = calcularPagamentosMeiaParcelaAjustada(
-    creditValue,
-    months,
-    taxaTotal,
-    incc ?? 5,
-    contemplationMonth
-  )
+  let pagamentosPreContemplacao: number[]
+  let ultimoFundoComumPago: number
+  let ultimaTaxaAdministracaoPaga: number
+  let totalInvestidoFundoComum: number
+  
+  if (tipoReducao === 'meia-parcela') {
+    // Lógica para Meia Parcela
+    const result = calcularPagamentosMeiaParcelaTotalAjustada(
+      creditValue,
+      months,
+      taxaTotal,
+      incc ?? 5,
+      contemplationMonth
+    )
+    pagamentosPreContemplacao = result.pagamentos
+    ultimoFundoComumPago = result.ultimoFundoComumPago
+    ultimaTaxaAdministracaoPaga = result.ultimaTaxaAdministracaoPaga
+    totalInvestidoFundoComum = result.totalInvestidoFundoComum
+  } else {
+    // Lógica para Fundo Comum (original)
+    const result = calcularPagamentosMeiaParcelaAjustada(
+      creditValue,
+      months,
+      taxaTotal,
+      incc ?? 5,
+      contemplationMonth
+    )
+    pagamentosPreContemplacao = result.pagamentos
+    ultimoFundoComumPago = result.ultimoFundoComumPago
+    ultimaTaxaAdministracaoPaga = result.ultimaTaxaAdministracaoPaga
+    totalInvestidoFundoComum = result.totalInvestidoFundoComum
+  }
 
   const ajusteAmortizacaoReajustado = calcularAjusteAmortizacaoReajustado(
     totalInvestidoFundoComum,
@@ -140,11 +163,27 @@ export function calculatePatrimonialLeverage(
     contemplationMonth
   )
 
-  const parcelaIntegral = calcularParcelaIntegral(
-    ultimoFundoComumPago,
-    ultimaTaxaAdministracaoPaga,
-    ajusteAmortizacaoReajustado
-  )
+  let parcelaIntegral: number
+  if (tipoReducao === 'meia-parcela') {
+    parcelaIntegral = calcularParcelaIntegralMeiaParcela(
+      ultimoFundoComumPago,
+      ultimaTaxaAdministracaoPaga,
+      ajusteAmortizacaoReajustado
+    )
+  } else {
+    parcelaIntegral = calcularParcelaIntegral(
+      ultimoFundoComumPago,
+      ultimaTaxaAdministracaoPaga,
+      ajusteAmortizacaoReajustado
+    )
+  }
+
+  // Calculate two versions of post-contemplation payments:
+  // 1. With monthly increment for displaying parcelaPosContemplacaoAjustada
+  // 2. Without monthly increment for calculating totalPagoConsorcio (same logic as fundo comum)
+  const meiaParcelaInicial = tipoReducao === 'meia-parcela'
+    ? calcularMeiaParcela(creditValue, taxaTotal, months)
+    : undefined
 
   const {
     pagamentos: amortizacaoAjustada,
@@ -154,11 +193,26 @@ export function calculatePatrimonialLeverage(
     months,
     contemplationMonth,
     incc ?? 5,
+    meiaParcelaInicial,
   )
   
-  // Total Pago Consórcio (soma todos os pagamentos pré e pós contemplação)
+  // For totalPagoConsorcio, use the same logic as fundo comum (no monthly increment)
+  const {
+    pagamentos: amortizacaoAjustadaSemIncremento,
+  } = calcularPagamentosPosContemplacaoAjustada(
+    parcelaIntegral,
+    months,
+    contemplationMonth,
+    incc ?? 5,
+    undefined, // No meiaParcelaInicial means no monthly increment
+  )
+
+  // O valor da parcela pós contemplação a ser exibido é a primeira parcela da amortização ajustada
+  const parcelaPosContemplacaoInicial = amortizacaoAjustada[0] ?? parcelaIntegral
+  
+  // Total Pago Consórcio (soma todos os pagamentos pré e pós contemplação, using the version without increment for meia parcela)
   const totalPagoPreContemplacao = pagamentosPreContemplacao.reduce((acc, val) => acc + val, 0)
-  const totalPagoPosContemplacao = amortizacaoAjustada.reduce((acc, val) => acc + val, 0)
+  const totalPagoPosContemplacao = amortizacaoAjustadaSemIncremento.reduce((acc, val) => acc + val, 0)
   const totalPagoConsorcio = totalPagoPreContemplacao + totalPagoPosContemplacao
   
   // Renda Passiva (valor do aluguel no último período)
@@ -185,7 +239,7 @@ export function calculatePatrimonialLeverage(
     percentPagoImovel,
     rendaPassiva,
     desembolso,
-    parcelaPosContemplacaoAjustada: parcelaAjustada,
+    parcelaPosContemplacaoAjustada: parcelaPosContemplacaoInicial,
     amortizacaoAjustada,
   }
 }

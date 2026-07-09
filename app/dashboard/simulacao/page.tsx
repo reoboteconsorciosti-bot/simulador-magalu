@@ -75,7 +75,7 @@ export default function SimulacaoPage() {
         clientName,   
         creditValue,
         months,
-        contemplationMonth: contemplationMonth ?? 0,
+        contemplationMonth: 0, // Sempre 0 na Nova Simulação
         incc: incc ?? 0,
         lanceEmbutido: lanceEmbutido ?? 0,
         taxaTotal,
@@ -220,7 +220,9 @@ export default function SimulacaoPage() {
             <div>
               <h1 className="text-2xl font-bold text-foreground">Nova Simulação</h1>
               <p className="text-muted-foreground">
-                Simule propostas para Magalu Consórcio com cálculo em tempo real.
+                {tipoReducao === 'meia-parcela' 
+                  ? 'Simule propostas para Consórcio Servopa em tempo real.' 
+                  : 'Simule propostas para Magalu Consórcio com cálculo em tempo real.'}
               </p>
             </div>
           </div>
@@ -280,23 +282,7 @@ export default function SimulacaoPage() {
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="contemplationMonth">Mês de Contemplação</Label>
-              <NumericFormat
-                key={`contemplationMonth-${clearKey}`}
-                id="contemplationMonth"
-                customInput={Input}
-                value={contemplationMonth}
-                onValueChange={(values) => {
-                  console.log('contemplationMonth onValueChange:', values.floatValue);
-                  setSharedField('contemplationMonth', values.floatValue ?? null);
-                }}
-                allowNegative={false}
-                decimalScale={0}
-                placeholder="10"
-                suffix=" meses"
-              />
-            </div>
+
 
             <div className="space-y-2">
               <Label htmlFor="incc">INCC (%)</Label>
@@ -383,7 +369,9 @@ export default function SimulacaoPage() {
                     {/* Meia parcela até a contemplação */}
                     <div className="p-6 bg-primary text-primary-foreground rounded-xl border-2 border-primary shadow-lg">
                       <div className="text-center">
-                        <p className="text-sm opacity-90 mb-2">Meia parcela até a contemplação</p>
+                        <p className="text-sm opacity-90 mb-2">
+                          {tipoReducao === 'fundo-comum' ? 'Fundo comum até a contemplação' : 'Meia parcela até a contemplação'}
+                        </p>
                         <p className="text-4xl font-extrabold">{formatCurrency(results.firstInitialPayment)}</p>
                       </div>
                     </div>
@@ -391,7 +379,7 @@ export default function SimulacaoPage() {
                     {/* Pós contemplação - Mais destacado */}
                     <div className="p-8 bg-[#ECFDF5] rounded-xl border-3 border-[#A7F3D0] shadow-xl">
                       <div className="text-center">
-                        <p className="text-lg text-[#6B7280] mb-3 font-semibold">Pós Contemplação</p>
+                        <p className="text-lg text-[#6B7280] mb-3 font-semibold">Parcela Integral</p>
                         <p className="text-5xl font-black text-[#059669]">{formatCurrency(results.finalPaymentAfterContemplation)}</p>
                       </div>
                     </div>

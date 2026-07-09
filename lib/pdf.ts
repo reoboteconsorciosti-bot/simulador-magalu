@@ -94,7 +94,7 @@ export function generateSimulationPDF(params: GeneratePDFParams) {
       ['Valor Total com Taxa', formatCurrency(results.totalValue)],
       ['Taxa em Reais', formatCurrency(results.feeValue)],
       ['Parcela Bruta Mensal', formatCurrency(results.grossInstallment)],
-      ['PARCELA INICIAL MENSAL', formatCurrency(results.finalPayment)],
+      [tipoReducao === 'fundo-comum' ? 'FUNDO COMUM ATÉ CONTEMPLAÇÃO' : 'MEIA PARCELA ATÉ CONTEMPLAÇÃO', formatCurrency(results.firstInitialPayment)],
       ['PÓS CONTEMPLAÇÃO', formatCurrency(results.finalPaymentAfterContemplation)],
       ['Total Pago no Plano', formatCurrency(results.totalPaid)],
     ],

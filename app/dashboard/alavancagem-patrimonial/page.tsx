@@ -90,7 +90,7 @@ export default function AlavancagemPatrimonialPage() {
   const alugueisRecebidos = results?.alugueisRecebidos || 0
   const creditoContemplado = creditoPatrimonial ?? results?.creditContemplado ?? 0
   const prazoRestante = months && contemplationMonth ? Math.max(0, months - contemplationMonth) : 0
-  const parcelaPosContemplacao = simulationResults?.finalPaymentAfterContemplation ?? 0
+  const parcelaPosContemplacao = results?.parcelaPosContemplacaoAjustada ?? simulationResults?.finalPaymentAfterContemplation ?? 0
   const valorAtualizadoImovel = results?.valorImovelCorrigido ?? 0
   const aluguelInicial = results?.aluguel ?? 0
   const sobrasOuDesembolso = aluguelInicial - parcelaPosContemplacao

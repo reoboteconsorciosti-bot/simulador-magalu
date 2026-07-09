@@ -143,6 +143,19 @@ export async function createAuthSession(user: User): Promise<string | null> {
 export async function getCurrentUser(): Promise<User | null> {
   const cookieStore = await cookies()
   const token = cookieStore.get(COOKIE_NAME)?.value
+
+  // Em desenvolvimento, se não houver token, retorna usuário falso
+  if (!token && process.env.NODE_ENV === 'development') {
+    const fakeUser: User = {
+      id: 'dev-user-1',
+      email: 'dev@reobote.com.br',
+      name: 'Usuário Desenvolvimento',
+      role: 'Consultor',
+      active: true,
+    }
+    return fakeUser
+  }
+
   if (!token) return null
 
   const payload = await verifySessionToken(token) as SessionPayload | null
