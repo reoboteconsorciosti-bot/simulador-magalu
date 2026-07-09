@@ -221,8 +221,8 @@ export default function SimulacaoPage() {
               <h1 className="text-2xl font-bold text-foreground">Nova Simulação</h1>
               <p className="text-muted-foreground">
                 {tipoReducao === 'meia-parcela' 
-                  ? 'Simule propostas para Consórcio Servopa em tempo real.' 
-                  : 'Simule propostas para Magalu Consórcio com cálculo em tempo real.'}
+                  ? 'Simule propostas para Consórcio em tempo real.' 
+                  : 'Simule propostas para Consórcio em tempo real.'}
               </p>
             </div>
           </div>
