@@ -456,21 +456,13 @@ export default function AlavancagemPatrimonialPage() {
                   <span className="text-[13px] font-black leading-none">+</span>
                 </div>
                 {/* Renda Passiva */}
-                <div className="bg-[#0e9f6e] rounded-2xl p-4 shadow-md flex flex-col gap-0.5">
+                <div className="bg-[#0e9f6e] rounded-2xl p-5 shadow-md flex flex-col gap-0.5">
                   <span className="text-[13px] font-bold text-emerald-100 uppercase tracking-wider">Renda Passiva</span>
                   <div className="text-2xl font-black text-white tracking-tight mt-1">{formatCurrency(rendaPassivaFinal)}</div>
                 </div>
                 {/* Patrim Acumulado dos Lucros (só aparece se houver sobra positiva) */}
                 {isSobraInicial && patrimonioAcumuladoLucros > 0 && !!aplicacaoMensal && (
                   <>
-                    <div className="w-full bg-white text-slate-500 rounded-xl py-3 px-4 flex items-center justify-start shadow-inner">
-                      <span className="text-[13px] font-black leading-none">+</span>
-                    </div>
-                    <div className="bg-[#0e9f6e] rounded-2xl p-4 shadow-md flex flex-col gap-0.5">
-                      <span className="text-[13px] font-bold text-emerald-100 uppercase tracking-wider">Reserva Financeira Gerada</span>
-                      <div className="text-2xl font-black text-white tracking-tight mt-1">{formatCurrency(patrimonioAcumuladoLucros)}</div>
-
-                    </div>
                   </>
                 )}
               </div>
