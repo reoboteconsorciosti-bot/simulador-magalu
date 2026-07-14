@@ -364,6 +364,46 @@ export function calcularPagamentosPosContemplacaoAjustada(
   }
 }
 
+// Total investido COMPLETO (uso exclusivo da Aposentadoria):
+// representa tudo que é efetivamente pago no consórcio ao longo do prazo total, coerente
+// com a PARCELA CHEIA exibida em cada modalidade.
+// - Fundo Comum: mantém a lógica atual (já correta) = totalPaid da simulação.
+// - Meia Parcela: usa a MESMA base da Alavancagem Patrimonial (parcela cheia = 27k...),
+//   somando as meia parcelas pré-contemplação + a parcela cheia (com o incremento que
+//   devolve "o que faltou") pós-contemplação, tudo com reajuste INCC anual.
+export function calcularTotalInvestidoCompleto(input: SimulationInput): number {
+  const { creditValue, months, contemplationMonth, taxaTotal, incc = 5, tipoReducao = 'meia-parcela' } = input
+  const mesContemplacaoUsado = contemplationMonth ?? Math.floor(months / 2)
+
+  if (tipoReducao === 'fundo-comum') {
+    return calculateSimulation({ ...input, tipoReducao: 'fundo-comum' }).totalPaid
+  }
+
+  // Meia Parcela — mesma base de cálculo da parcela cheia exibida (Alavancagem Patrimonial)
+  const {
+    pagamentos: pagamentosPre,
+    ultimoFundoComumPago,
+    ultimaTaxaAdministracaoPaga,
+    totalInvestidoFundoComum,
+  } = calcularPagamentosMeiaParcelaTotalAjustada(creditValue, months, taxaTotal, incc, mesContemplacaoUsado)
+
+  const ajusteAmortizacaoReajustado = calcularAjusteAmortizacaoReajustado(
+    totalInvestidoFundoComum, months, mesContemplacaoUsado)
+
+  const parcelaIntegral = calcularParcelaIntegralMeiaParcela(
+    ultimoFundoComumPago, ultimaTaxaAdministracaoPaga, ajusteAmortizacaoReajustado)
+
+  const meiaParcelaInicial = calcularMeiaParcela(creditValue, taxaTotal, months)
+
+  const { pagamentos: pagamentosPos } = calcularPagamentosPosContemplacaoAjustada(
+    parcelaIntegral, months, mesContemplacaoUsado, incc, meiaParcelaInicial)
+
+  return (
+    pagamentosPre.reduce((acc, val) => acc + val, 0) +
+    pagamentosPos.reduce((acc, val) => acc + val, 0)
+  )
+}
+
 export function calculateSimulation(input: SimulationInput): SimulationResult {
   const { creditValue, months, contemplationMonth, taxaTotal, incc = 5, tipoReducao = 'meia-parcela' } = input
   

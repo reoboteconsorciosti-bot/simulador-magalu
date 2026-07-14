@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import { NumericFormat } from 'react-number-format'
-import { calculatePrevidenciaAplicada, calculateSimulation, formatCurrency } from '@/lib/calculations/index'
+import { calcularTotalInvestidoCompleto, calculatePatrimonialLeverage, calculatePrevidenciaAplicada, calculateSimulation, formatCurrency } from '@/lib/calculations/index'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -46,23 +46,50 @@ export default function AposentadoriaPage() {
     return null
   }, [creditValue, months, contemplationMonth, incc, taxaTotal, tipoReducao])
 
-  // Calcula a simulação com currentMonth como mês de contemplação para pegar o total investido completo
-  const totalInvestidoResults = useMemo(() => {
-    const isValid = 
-      creditValue != null && creditValue > 0 && 
+  // Replica exatamente o cálculo de "PARC. PÓS CONT." da Alavancagem Patrimonial
+  // para que a Parcela Cheia (meia parcela) exiba o mesmo valor.
+  const patrimonialResults = useMemo(() => {
+    const isValid =
+      creditValue != null && creditValue > 0 &&
+      months != null && months > 0 &&
+      taxaTotal != null &&
+      contemplationMonth != null
+
+    if (isValid) {
+      return calculatePatrimonialLeverage({
+        creditValue,
+        months,
+        rentPercent: 0.7,
+        correctionIncc: 5,
+        rentIgpPercent: 5,
+        modality: 'Sorteio',
+        currentMonth: contemplationMonth,
+        taxaTotal,
+        contemplationMonth,
+        incc: incc ?? 5,
+        tipoReducao,
+      })
+    }
+    return null
+  }, [creditValue, months, taxaTotal, contemplationMonth, incc, tipoReducao])
+
+  // Total investido completo (tudo pago no plano: meia parcela + parcela cheia + "o que faltou", com INCC)
+  const totalInvestidoCompleto = useMemo(() => {
+    const isValid =
+      creditValue != null && creditValue > 0 &&
       months != null && months > 0 &&
       taxaTotal != null &&
       currentMonth != null
-    
+
     if (isValid) {
-      return calculateSimulation({
-        clientName: '',   
+      return calcularTotalInvestidoCompleto({
+        clientName: '',
         creditValue,
         months,
         contemplationMonth: currentMonth,
         incc: incc ?? 5,
         taxaTotal,
-        tipoReducao
+        tipoReducao,
       })
     }
     return null
@@ -244,7 +271,7 @@ export default function AposentadoriaPage() {
             <div className="border-[2px] border-[#f59e0b] rounded-xl p-5 flex justify-between items-center bg-card shadow-sm hover:shadow-md transition-all font-sans">
               <div className="space-y-1">
                 <span className="text-[9px] font-extrabold text-muted-foreground uppercase tracking-widest">PARCELA CHEIA</span>
-                <div className="text-xl md:text-2xl font-black text-foreground">{formatCurrency(simulationResults?.finalPaymentAfterContemplation ?? 0)}</div>
+                <div className="text-xl md:text-2xl font-black text-foreground">{formatCurrency((tipoReducao !== 'fundo-comum' ? patrimonialResults?.parcelaPosContemplacaoAjustada : simulationResults?.finalPaymentAfterContemplation) ?? 0)}</div>
               </div>
               <div className="w-12 h-12 shrink-0 text-[#f59e0b] bg-[#f59e0b]/10 rounded-full border border-[#f59e0b]/20 flex items-center justify-center">
                 <Calculator className="w-7 h-7" strokeWidth={2.1} />
@@ -255,7 +282,7 @@ export default function AposentadoriaPage() {
             <div className="border-[2px] border-emerald-500 rounded-xl p-5 flex justify-between items-center bg-card shadow-sm hover:shadow-md transition-all font-sans">
               <div className="space-y-1">
                 <span className="text-[9px] font-extrabold text-muted-foreground uppercase tracking-widest">LUCRO LÍQUIDO</span>
-                <div className="text-xl md:text-2xl font-black text-emerald-600 dark:text-emerald-400">{formatCurrency(totalInvestidoResults && results ? (results.valorCorrigido - totalInvestidoResults.totalPaid) : results?.lucro ?? 0)}</div>
+                <div className="text-xl md:text-2xl font-black text-emerald-600 dark:text-emerald-400">{formatCurrency(totalInvestidoCompleto != null && results ? (results.valorCorrigido - totalInvestidoCompleto) : results?.lucro ?? 0)}</div>
               </div>
               <div className="w-12 h-12 shrink-0 text-emerald-500 bg-emerald-500/10 rounded-full border border-emerald-500/20 flex items-center justify-center">
                 <HandCoins className="w-7 h-7" strokeWidth={2.1} />
@@ -274,7 +301,7 @@ export default function AposentadoriaPage() {
             <div className="border-[2px] border-slate-400 dark:border-slate-600 rounded-xl p-5 flex justify-between items-center bg-card shadow-sm hover:shadow-md transition-all">
               <div className="space-y-1">
                 <span className="text-[9px] font-extrabold text-muted-foreground uppercase tracking-widest">TOTAL INVESTIDO</span>
-                <div className="text-xl md:text-2xl font-black text-foreground">{formatCurrency((totalInvestidoResults?.totalPaid || results?.totalInvestido) ?? 0)}</div>
+                <div className="text-xl md:text-2xl font-black text-foreground">{formatCurrency((totalInvestidoCompleto ?? results?.totalInvestido) ?? 0)}</div>
               </div>
             </div>
           </div>

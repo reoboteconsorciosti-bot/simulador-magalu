@@ -45,7 +45,7 @@ export function calculatePrevidenciaAplicada(
   )
   
   // Total Investido
-  const totalInvestido = parcelaCheia * currentMonth
+  const totalInvestido = parcelaCheia * currentMonth 
   
   // Lucro
   const lucro = valorCorrigido - totalInvestido
