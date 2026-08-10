@@ -82,6 +82,7 @@ export interface LeverageFinancialResult {
   totalCredit: number;
   saleValue: number;
   totalInvested: number;
+  meiaParcelaAteContemplacao: number;
   profit: number;
   roi: number;
   monthlyReturn: number;

@@ -15,30 +15,49 @@ export default function AlavancagemFinanceiraPage() {
     tipoReducao,
     setSharedField,
   } = useSharedSimulationStore()
-  
+
+  console.log('[PAGE - RENDER] VALORES DO STORE NA PAGINA:', { creditValue, months, incc, taxaTotal, contemplationMonth, tipoReducao })
+
   const [saleGainPercent, setSaleGainPercent] = useState<number | null>(20)
   const [installmentType, setInstallmentType] = useState<string>('Meia')
   const results = useMemo(() => {
-    if (creditValue !== null && creditValue > 0 && 
-        months !== null && months > 0 && 
-        saleGainPercent !== null && 
-        contemplationMonth !== null) {
-      return calculateFinancialLeverage({
-        creditValue,
-        months,
-        incc,
-        taxaTotal,
-        saleGainPercent,
-        installmentType,
-        modality: 'Sorteio',
-        currentMonth: contemplationMonth,
-        rentPercent: null,
-        contemplationMonth,
-        tipoReducao
-      })
-    }
-    return null
+    console.log('[PAGE - useMemo] EXECUTOU useMemo. Parametros recebidos do store:', { creditValue, months, incc, taxaTotal, saleGainPercent, installmentType, contemplationMonth, tipoReducao })
+    // Valores padrão para exibir resultados mesmo com store vazia
+    const defaultCreditValue = 110000
+    const defaultMonths = 220
+    const defaultTaxaTotal = 27
+    const defaultIncc = 5
+    const defaultContemplationMonth = 49
+    const defaultTipoReducao = 'meia-parcela'
+
+    const _creditValue = Number(creditValue) > 0 ? Number(creditValue) : defaultCreditValue
+    const _months = Number(months) > 0 ? Number(months) : defaultMonths
+    const _taxaTotal = (taxaTotal !== null && taxaTotal !== undefined && !isNaN(Number(taxaTotal))) ? Number(taxaTotal) : defaultTaxaTotal
+    const _incc = (incc !== null && incc !== undefined && !isNaN(Number(incc))) ? Number(incc) : defaultIncc
+    const _contemplationMonth = Number(contemplationMonth) > 0 ? Number(contemplationMonth) : defaultContemplationMonth
+    const _tipoReducao = tipoReducao ?? defaultTipoReducao
+    const _saleGainPercent = (saleGainPercent !== null && saleGainPercent !== undefined && !isNaN(Number(saleGainPercent))) ? Number(saleGainPercent) : 20
+
+    console.log('[PAGE - useMemo] VALORES CALCULADOS (aferir):', { _creditValue, _months, _taxaTotal, _incc, _contemplationMonth, _tipoReducao, _saleGainPercent })
+
+    const computedResults = calculateFinancialLeverage({
+      creditValue: _creditValue,
+      months: _months,
+      incc: _incc,
+      taxaTotal: _taxaTotal,
+      saleGainPercent: _saleGainPercent,
+      installmentType,
+      modality: 'Sorteio',
+      currentMonth: _contemplationMonth,
+      rentPercent: null,
+      contemplationMonth: _contemplationMonth,
+      tipoReducao: _tipoReducao
+    })
+    console.log('[PAGE - useMemo] RETORNO calculateFinancialLeverage (totalInvested):', computedResults?.totalInvested, 'profit:', computedResults?.profit)
+    return computedResults
   }, [creditValue, months, incc, taxaTotal, saleGainPercent, installmentType, contemplationMonth, tipoReducao])
+
+  console.log('[PAGE - RENDER] results obtidos (vou usar nos cards):', { totalInvested: results?.totalInvested, profit: results?.profit, saleValue: results?.saleValue, roi: results?.roi })
 
   const syncFinSlider = (value: string | undefined) => {
     if (value) {

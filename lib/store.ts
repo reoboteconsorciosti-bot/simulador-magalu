@@ -138,39 +138,56 @@ export const useSimulationStore = create<SimulationState>()(
 )
 
 export const useSharedSimulationStore = create<SharedSimulationState>()(
-  persist(
-    (set) => ({
-      clientName: '',
-      creditValue: null,
-      months: null,
-      contemplationMonth: null,
-      incc: 5,
-      lanceEmbutido: null,
-      taxaTotal: null,
-      tipoReducao: 'meia-parcela',
-      isLoading: false,
-      setSharedField: (key, value) => {
-        console.log(`Atualizando campo ${key}:`, value)
-        set({ [key]: value })
-      },
-      clearSharedFields: () => {
-        console.log('🧹 Limpando todos os campos na store...')
-        set((state) => ({
-          ...state, // Mantém o resto do estado (mas vamos resetar todos os campos compartilhados)
-          clientName: '',
-          creditValue: null,
-          months: null,
-          contemplationMonth: null,
-          incc: 5,
-          lanceEmbutido: null,
-          taxaTotal: null,
-          tipoReducao: 'meia-parcela',
-          isLoading: false,
-        }))
-      },
-    }),
-    {
-      name: 'reobote-shared-simulation',
-    }
-  )
+  (set) => ({
+    clientName: '',
+    creditValue: 110000,
+    months: 220,
+    contemplationMonth: 49,
+    incc: 5,
+    lanceEmbutido: 0,
+    taxaTotal: 27,
+    tipoReducao: 'meia-parcela',
+    isLoading: false,
+    setSharedField: (key, value) => {
+      console.log(`[STORE setSharedField] key=${key}, raw value=`, value)
+      const VALID_DEFAULTS: Record<string, number | string> = {
+        creditValue: 110000,
+        months: 220,
+        contemplationMonth: 49,
+        incc: 5,
+        lanceEmbutido: 0,
+        taxaTotal: 27,
+      }
+      let safeValue: number | string = value as number | string
+      if (key in VALID_DEFAULTS) {
+        const num = Number(value)
+        if (value === null || value === undefined || value === '' || isNaN(num)) {
+          safeValue = VALID_DEFAULTS[key]
+          console.log(`[STORE setSharedField] CORRIGINDO null/empty: key=${key} usando default=`, safeValue)
+        } else {
+          safeValue = num
+          if ((key === 'months' || key === 'contemplationMonth') && num <= 0) {
+            safeValue = VALID_DEFAULTS[key]
+            console.log(`[STORE setSharedField] CORRIGINDO <= 0: key=${key} usando default=`, safeValue)
+          }
+        }
+      }
+      console.log(`[STORE setSharedField] key=${key}, gravando safeValue=`, safeValue)
+      set({ [key]: safeValue })
+    },
+    clearSharedFields: () => {
+      console.log('🧹 Limpando todos os campos na store...')
+      set({
+        clientName: '',
+        creditValue: 110000,
+        months: 220,
+        contemplationMonth: 49,
+        incc: 5,
+        lanceEmbutido: 0,
+        taxaTotal: 27,
+        tipoReducao: 'meia-parcela',
+        isLoading: false,
+      })
+    },
+  })
 )

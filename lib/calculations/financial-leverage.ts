@@ -5,23 +5,56 @@ import {
   calcularAluguel, 
   getParcelaPosContemplacao 
 } from './leverage-helpers'
+import { calcularParcelaInicial } from './simulation'
 
-function calcularTotalInvestido(valorParcela: number, quantidadeMeses: number, inccPercentual: number): number {
-  const INCC = inccPercentual / 100
-  
-  let totalInvestido = 0
-  let parcelaAtual = valorParcela
+function calcularTotalInvestido(
+  credito: number,
+  prazo: number,
+  taxaTotal: number,
+  inccPercentual: number,
+  quantidadeMeses: number,
+  tipoParcela: 'Meia' | 'Cheia',
+  tipoReducao: string = 'meia-parcela'
+): { totalInvestido: number; ultimaParcela: number } {
+  console.log('[calcularTotalInvestido] ENTRADA:', { credito, prazo, taxaTotal, inccPercentual, quantidadeMeses, tipoParcela, tipoReducao })
 
-  for (let mes = 1; mes <= quantidadeMeses; mes++) {
-    // A cada início de novo ciclo de 12 meses (exceto o primeiro), aplica reajuste
-    if (mes > 1 && (mes - 1) % 12 === 0) {
-      parcelaAtual = parcelaAtual * (1 + INCC)
-    }
-
-    totalInvestido += parcelaAtual
+  // Define a parcela base conforme a modalidade:
+  // - Fundo Comum: usa calcularParcelaInicial (fundo comum / 2 + taxa inteira), igual ao exibido na UI
+  // - Meia Parcela: usa (fundo comum / 2 + taxa / 2), igual ao exibido na UI
+  let parcelaBase: number
+  if (tipoReducao === 'fundo-comum') {
+    parcelaBase = calcularParcelaInicial(credito, prazo, taxaTotal)
+    console.log('[calcularTotalInvestido] Modalidade FUNDO COMUM - parcelaBase:', parcelaBase)
+  } else {
+    const fundoComumMensal = credito / prazo
+    const taxaMensal = (credito * (taxaTotal / 100)) / prazo
+    parcelaBase = fundoComumMensal / 2 + taxaMensal / 2
+    console.log('[calcularTotalInvestido] Modalidade MEIA PARCELA - parcelaBase:', parcelaBase)
   }
 
-  return totalInvestido
+  if (!quantidadeMeses || quantidadeMeses <= 0) {
+    console.log('[calcularTotalInvestido] SAIDA (meses<=0):', { totalInvestido: 0, ultimaParcela: parcelaBase })
+    return { totalInvestido: 0, ultimaParcela: parcelaBase }
+  }
+
+  // A parcela base cresce com INCC a cada 12 meses (estrutura condicional mantida)
+  let parcelaAtual = parcelaBase
+  let totalInvestido = 0
+  let ultimaParcela = parcelaBase
+  const maxMeses = Math.min(quantidadeMeses, 1000)
+  console.log('[calcularTotalInvestido] Estado inicial:', { parcelaBase, parcelaAtual, maxMeses })
+
+  for (let mes = 1; mes <= maxMeses; mes++) {
+    if (mes % 12 === 0) {
+      parcelaAtual = parcelaAtual * (1 + inccPercentual / 100)
+      console.log(`[calcularTotalInvestido] Reajuste INCC mês ${mes}:`, { parcelaAtual })
+    }
+    totalInvestido += parcelaAtual
+    ultimaParcela = parcelaAtual
+  }
+
+  console.log('[calcularTotalInvestido] SAIDA:', { totalInvestido, ultimaParcela })
+  return { totalInvestido, ultimaParcela }
 }
 
 function calcularLucroVenda(valorVenda: number, totalInvestido: number): number {
@@ -41,6 +74,8 @@ function calcularRentabilidadeMensal(roi: number, meses: number): number {
 export function calculateFinancialLeverage(
   input: LeverageFinancialInput
 ): LeverageFinancialResult {
+  console.log('[calculateFinancialLeverage] INPUT BRUTO RECEBIDO:', JSON.stringify(input, null, 2))
+
   const { 
     creditValue, 
     months, 
@@ -54,71 +89,84 @@ export function calculateFinancialLeverage(
     contemplationMonth,
     tipoReducao
   } = input
+
+  const DEFAULT_CREDIT = 110000
+  const DEFAULT_MONTHS = 220
+  const DEFAULT_INCC = 5
+  const DEFAULT_TAXA = 27
+  const DEFAULT_SALE_GAIN = 20
+  const DEFAULT_CONTEMPLACAO = 49
+
+  const creditValueOriginal = (creditValue && creditValue > 0) ? creditValue : DEFAULT_CREDIT
+  const monthsValue = (months && months > 0) ? months : DEFAULT_MONTHS
+  const inccValue = (incc !== null && incc !== undefined && !isNaN(incc)) ? incc : DEFAULT_INCC
+  const taxaTotalValue = (taxaTotal !== null && taxaTotal !== undefined && !isNaN(taxaTotal)) ? taxaTotal : DEFAULT_TAXA
+  const saleGain = (saleGainPercent !== null && saleGainPercent !== undefined && !isNaN(saleGainPercent)) ? saleGainPercent : DEFAULT_SALE_GAIN
+  const contemplacaoUsada = (contemplationMonth && contemplationMonth > 0) ? contemplationMonth
+    : (currentMonth && currentMonth > 0) ? currentMonth
+    : DEFAULT_CONTEMPLACAO
+
+  console.log('[calculateFinancialLeverage] VALORES APOS FALLBACKS:', { creditValueOriginal, monthsValue, inccValue, taxaTotalValue, saleGain, contemplacaoUsada })
+
+  const anosCompletos = Math.floor((contemplacaoUsada - 1) / 12)
   
-  // Use defaults if null
-  const inccValue = incc ?? 0
-  const taxaTotalValue = taxaTotal ?? 0
-  
-  // Step 1: Calculate credit value with INCC (annual compound interest)
-  const creditValueOriginal = creditValue
-  
-  // Calculate number of complete years based on currentMonth (when the credit is contemplated)
-  // Rule: 60 months = 4 years (not 5) - subtract 1 before calculating
-  const anosCompletos = Math.floor((currentMonth - 1) / 12)
-  
-  // Apply INCC: valorInicial * (1 + percentualAnual / 100) ** anosCompletos
   const creditValueWithIncc = creditValueOriginal * Math.pow(1 + inccValue / 100, anosCompletos)
   
   console.log('=== Cálculo INCC ===')
   console.log('Valor original da carta:', creditValueOriginal)
   console.log('INCC anual (%):', inccValue)
-  console.log('Mês atual:', currentMonth)
+  console.log('Mês contemplação:', contemplacaoUsada)
   console.log('Anos completos:', anosCompletos)
   console.log('Valor com INCC:', creditValueWithIncc)
   
-  // Calculate Final Monthly Payment (Parcela Inicial Mensal) like in the simulation
   const totalValueWithTax = creditValueOriginal * (1 + taxaTotalValue / 100)
   const feeValue = calculateFee(creditValueOriginal, totalValueWithTax)
-  const monthlyFee = feeValue / months
-  const grossInstallment = calculateMonthlyInstallment(creditValueOriginal, months)
+  const monthlyFee = feeValue / monthsValue
+  const grossInstallment = calculateMonthlyInstallment(creditValueOriginal, monthsValue)
   const finalPayment = (grossInstallment / 2) + monthlyFee
   
-  // Calculate installment amount based on type (Meia/Cheia) using the final payment
-  const actualInstallment = installmentType === 'Meia' ? finalPayment : finalPayment * 2
+  const totalCredit = creditValueWithIncc * (1 + saleGain / 100)
   
-  // Total Credit (calculated as per the image, now using credit with INCC)
-  const totalCredit = creditValueWithIncc * (1 + saleGainPercent / 100)
+  const saleValue = creditValueWithIncc * (saleGain / 100)
   
-  // Sale Value (valorFinal = valor recebido na venda)
-  const saleValue = creditValueWithIncc * (saleGainPercent / 100)
+  console.log('[calculateFinancialLeverage] CHAMANDO calcularTotalInvestido com:', { creditValueOriginal, monthsValue, taxaTotalValue, inccValue, contemplacaoUsada, installmentType, tipoReducao })
+  const { totalInvestido, ultimaParcela } = calcularTotalInvestido(
+    creditValueOriginal,
+    monthsValue,
+    taxaTotalValue,
+    inccValue,
+    contemplacaoUsada,
+    (installmentType as 'Meia' | 'Cheia') || 'Meia',
+    tipoReducao || 'meia-parcela'
+  )
+  const totalInvested = totalInvestido
+  console.log('[calculateFinancialLeverage] RETORNO calcularTotalInvestido:', { totalInvestido, ultimaParcela })
   
-  // Total Invested with annual INCC adjustment, using the final payment
-  const totalInvested = calcularTotalInvestido(actualInstallment, currentMonth, inccValue)
+  const actualInstallment = ultimaParcela
   
-  // Profit using the separate function
   const profit = calcularLucroVenda(saleValue, totalInvested)
+  console.log('[calculateFinancialLeverage] profit calculado:', profit, 'saleValue:', saleValue, 'totalInvested:', totalInvested)
   
-  // ROI (%)
   const roi = calculateROI(profit, totalInvested)
+  console.log('[calculateFinancialLeverage] roi calculado:', roi)
   
-  // Monthly Return (Rentabilidade Mensal)
-  const monthlyReturn = calcularRentabilidadeMensal(roi, currentMonth)
+  const monthlyReturn = calcularRentabilidadeMensal(roi, contemplacaoUsada)
+  console.log('[calculateFinancialLeverage] monthlyReturn calculado:', monthlyReturn)
   
-  // Novos cálculos usando funções compartilhadas
   let parcelaPosContemplacao: number | undefined
   let aluguel: number | undefined
   let lucroAluguelParcela: number | undefined
   
-  if (contemplationMonth && taxaTotalValue !== undefined) {
+  if (contemplacaoUsada && taxaTotalValue !== undefined) {
     parcelaPosContemplacao = getParcelaPosContemplacao({
       clientName: '',
-      creditValue,
-      months,
-      contemplationMonth,
+      creditValue: creditValueOriginal,
+      months: monthsValue,
+      contemplationMonth: contemplacaoUsada,
       incc: inccValue,
       lanceEmbutido: 0,
       taxaTotal: taxaTotalValue,
-      tipoReducao
+      tipoReducao: tipoReducao || 'meia-parcela'
     })
     
     if (rentPercent) {
@@ -138,13 +186,14 @@ export function calculateFinancialLeverage(
   console.log('Lucro:', profit)
   console.log('ROI:', roi + '%')
   console.log('Rentabilidade mensal:', monthlyReturn + '%')
-  
-  return {
+
+  const retorno = {
     creditValueOriginal,
     creditValueWithIncc,
     totalCredit,
     saleValue,
     totalInvested,
+    meiaParcelaAteContemplacao: ultimaParcela,
     profit,
     roi,
     monthlyReturn,
@@ -152,4 +201,6 @@ export function calculateFinancialLeverage(
     aluguel,
     lucroAluguelParcela
   }
+  console.log('[calculateFinancialLeverage] RETORNO FINAL DA FUNCAO:', JSON.stringify(retorno, null, 2))
+  return retorno
 }
