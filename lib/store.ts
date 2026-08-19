@@ -149,30 +149,24 @@ export const useSharedSimulationStore = create<SharedSimulationState>()(
     tipoReducao: 'meia-parcela',
     isLoading: false,
     setSharedField: (key, value) => {
-      console.log(`[STORE setSharedField] key=${key}, raw value=`, value)
-      const VALID_DEFAULTS: Record<string, number | string> = {
-        creditValue: 110000,
-        months: 220,
-        contemplationMonth: 49,
-        incc: 5,
-        lanceEmbutido: 0,
-        taxaTotal: 27,
-      }
-      let safeValue: number | string = value as number | string
-      if (key in VALID_DEFAULTS) {
+      // Campos numéricos aceitam `null` enquanto o usuário está digitando/apagando
+      // (ex.: backspace até limpar o input). Os fallbacks para valores padrão
+      // (110000, 220, etc.) ficam a cargo de cada tela no momento do cálculo/exibição,
+      // não aqui — corrigir para um default a cada tecla pressionada fazia o input
+      // "pular" de volta ao valor formatado no meio da edição.
+      const NUMERIC_FIELDS = new Set([
+        'creditValue',
+        'months',
+        'contemplationMonth',
+        'incc',
+        'lanceEmbutido',
+        'taxaTotal',
+      ])
+      let safeValue: number | string | null = value as number | string | null
+      if (NUMERIC_FIELDS.has(key as string) && value !== null && value !== undefined && value !== '') {
         const num = Number(value)
-        if (value === null || value === undefined || value === '' || isNaN(num)) {
-          safeValue = VALID_DEFAULTS[key]
-          console.log(`[STORE setSharedField] CORRIGINDO null/empty: key=${key} usando default=`, safeValue)
-        } else {
-          safeValue = num
-          if ((key === 'months' || key === 'contemplationMonth') && num <= 0) {
-            safeValue = VALID_DEFAULTS[key]
-            console.log(`[STORE setSharedField] CORRIGINDO <= 0: key=${key} usando default=`, safeValue)
-          }
-        }
+        safeValue = isNaN(num) ? null : num
       }
-      console.log(`[STORE setSharedField] key=${key}, gravando safeValue=`, safeValue)
       set({ [key]: safeValue })
     },
     clearSharedFields: () => {
