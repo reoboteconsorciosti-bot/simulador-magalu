@@ -12,6 +12,7 @@ interface SharedSimulationState {
   incc: number | null
   lanceEmbutido: number | null
   taxaTotal: number | null
+  reducePercentage: number | null
   tipoReducao: string
   isLoading: boolean
   setSharedField: <K extends keyof SharedSimulationState>(key: K, value: SharedSimulationState[K]) => void
@@ -146,6 +147,7 @@ export const useSharedSimulationStore = create<SharedSimulationState>()(
     incc: 5,
     lanceEmbutido: 0,
     taxaTotal: 27,
+    reducePercentage: 50,
     tipoReducao: 'meia-parcela',
     isLoading: false,
     setSharedField: (key, value) => {
@@ -161,6 +163,7 @@ export const useSharedSimulationStore = create<SharedSimulationState>()(
         'incc',
         'lanceEmbutido',
         'taxaTotal',
+        'reducePercentage',
       ])
       let safeValue: number | string | null = value as number | string | null
       if (NUMERIC_FIELDS.has(key as string) && value !== null && value !== undefined && value !== '') {
@@ -179,6 +182,7 @@ export const useSharedSimulationStore = create<SharedSimulationState>()(
         incc: 5,
         lanceEmbutido: 0,
         taxaTotal: 27,
+        reducePercentage: 50,
         tipoReducao: 'meia-parcela',
         isLoading: false,
       })

@@ -24,19 +24,20 @@ export default function SimulacaoPage() {
   const addSimulation = useSimulationStore((state) => state.addSimulation)
   const updateSimulationStatus = useSimulationStore((state) => state.updateSimulationStatus)
   const [clearKey, setClearKey] = useState<number>(0)
-  
+
   // Debug: Log the entire store state whenever it changes
   const storeState = useSharedSimulationStore()
   console.log('Full store state:', storeState)
-  
-  const { 
-    clientName, 
-    creditValue, 
-    months, 
+
+  const {
+    clientName,
+    creditValue,
+    months,
     contemplationMonth,
-    incc, 
-    lanceEmbutido, 
+    incc,
+    lanceEmbutido,
     taxaTotal,
+    reducePercentage,
     tipoReducao,
     isLoading,
     setSharedField,
@@ -61,18 +62,18 @@ export default function SimulacaoPage() {
       contemplationMonth,
       taxaTotal
     })
-    
+
     // Verificações mais permissivas para taxaTotal (aceita 0)
-    const isValid = 
-      creditValue != null && creditValue > 0 && 
+    const isValid =
+      creditValue != null && creditValue > 0 &&
       months != null && months > 0 &&
       taxaTotal != null
-    
+
     console.log('isValid:', isValid)
-    
+
     if (isValid) {
       return calculateSimulation({
-        clientName,   
+        clientName,
         creditValue,
         months,
         contemplationMonth: 0, // Sempre 0 na Nova Simulação
@@ -80,21 +81,22 @@ export default function SimulacaoPage() {
         lanceEmbutido: lanceEmbutido ?? 0,
         taxaTotal,
         tipoReducao,
+        reducePercentage,
       })
     }
     return null
-  }, [clientName, creditValue, months, contemplationMonth, incc, lanceEmbutido, taxaTotal, tipoReducao])
+  }, [clientName, creditValue, months, contemplationMonth, incc, lanceEmbutido, taxaTotal, tipoReducao, reducePercentage])
 
   const handleSave = () => {
     if (!clientName.trim()) {
       toast.error('Por favor, informe o nome do cliente')
       return
     }
-    if (!results || !user || 
-        creditValue == null || 
-        months == null ||
-        contemplationMonth == null ||
-        taxaTotal == null) return
+    if (!results || !user ||
+      creditValue == null ||
+      months == null ||
+      contemplationMonth == null ||
+      taxaTotal == null) return
 
     setSharedField('isLoading', true)
 
@@ -133,11 +135,11 @@ export default function SimulacaoPage() {
       toast.error('Por favor, informe o nome do cliente')
       return
     }
-    if (!results || !user || 
-        creditValue == null || 
-        months == null ||
-        contemplationMonth == null ||
-        taxaTotal == null) return
+    if (!results || !user ||
+      creditValue == null ||
+      months == null ||
+      contemplationMonth == null ||
+      taxaTotal == null) return
 
     setSharedField('isLoading', true)
 
@@ -188,14 +190,14 @@ export default function SimulacaoPage() {
 
   const handleClear = () => {
     console.log('🔄 Iniciando limpeza completa...')
-    
+
     // 1. Limpa o localStorage completamente
     localStorage.removeItem('reobote-shared-simulation')
     console.log('✅ localStorage limpo')
-    
+
     // 2. Força re-renderização dos inputs ANTES de resetar
     setClearKey((prev: number) => prev + 1)
-    
+
     // 3. Reseta todos os campos INDIVIDUALMENTE para garantir
     setSharedField('clientName', '')
     setSharedField('creditValue', null)
@@ -205,7 +207,7 @@ export default function SimulacaoPage() {
     setSharedField('lanceEmbutido', null)
     setSharedField('taxaTotal', null)
     setSharedField('isLoading', false)
-    
+
     // 4. Chama a função clearSharedFields da store como backup
     setTimeout(() => {
       clearSharedFields()
@@ -215,18 +217,18 @@ export default function SimulacaoPage() {
 
   return (
     <div className="space-y-6">
-        <div>
-          <div className="flex flex-wrap items-start justify-between gap-3">
-            <div>
-              <h1 className="text-2xl font-bold text-foreground">Nova Simulação</h1>
-              <p className="text-muted-foreground">
-                {tipoReducao === 'meia-parcela' 
-                  ? 'Simule propostas para Consórcio em tempo real.' 
-                  : 'Simule propostas para Consórcio em tempo real.'}
-              </p>
-            </div>
+      <div>
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">Nova Simulação</h1>
+            <p className="text-muted-foreground">
+              {tipoReducao === 'meia-parcela'
+                ? 'Simule propostas para Consórcio em tempo real.'
+                : 'Simule propostas para Consórcio em tempo real.'}
+            </p>
           </div>
         </div>
+      </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Input Form */}
@@ -328,11 +330,25 @@ export default function SimulacaoPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="fundo-comum">Fundo Comum</SelectItem>
-                  <SelectItem value="meia-parcela">Meia Parcela</SelectItem>
+                  <SelectItem value="meia-parcela">Redução de Parcela</SelectItem>
                 </SelectContent>
               </Select>
             </div>
-
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="sellerName">Reduzir Parcela (%)</Label>
+              <NumericFormat
+                key={`reducePercentage-${clearKey}`}
+                id="reducePercentage"
+                customInput={Input}
+                value={reducePercentage}
+                onValueChange={(values) => setSharedField('reducePercentage', values.floatValue ?? null)}
+                decimalSeparator=","
+                suffix="%"
+                decimalScale={2}
+                allowNegative={false}
+                placeholder="0,00%"
+              />
+            </div>
             {/* Seller Info */}
 
             {/* Action Buttons */}
@@ -375,7 +391,7 @@ export default function SimulacaoPage() {
                         <p className="text-4xl font-extrabold">{formatCurrency(results.firstInitialPayment)}</p>
                       </div>
                     </div>
-                    
+
                     {/* Pós contemplação - Mais destacado */}
                     <div className="p-8 bg-[#ECFDF5] rounded-xl border-3 border-[#A7F3D0] shadow-xl">
                       <div className="text-center">

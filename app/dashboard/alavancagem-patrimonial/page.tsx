@@ -13,6 +13,7 @@ export default function AlavancagemPatrimonialPage() {
     taxaTotal,
     incc,
     tipoReducao,
+    reducePercentage,
     setSharedField
   } = useSharedSimulationStore()
 
@@ -38,11 +39,12 @@ export default function AlavancagemPatrimonialPage() {
         taxaTotal,
         contemplationMonth,
         incc: incc ?? 5,
-        tipoReducao
+        tipoReducao,
+        reducePercentage
       })
     }
     return null
-  }, [creditValue, months, rentPercent, correctionIncc, rentIgpPercent, taxaTotal, contemplationMonth, incc, tipoReducao])
+  }, [creditValue, months, rentPercent, correctionIncc, rentIgpPercent, taxaTotal, contemplationMonth, incc, tipoReducao, reducePercentage])
 
   const simulationResults = useMemo(() => {
     if (
@@ -60,11 +62,12 @@ export default function AlavancagemPatrimonialPage() {
         contemplationMonth,
         incc: correctionIncc ?? 5,
         taxaTotal,
-        tipoReducao
+        tipoReducao,
+        reducePercentage
       })
     }
     return null
-  }, [creditValue, months, contemplationMonth, taxaTotal, correctionIncc, tipoReducao])
+  }, [creditValue, months, contemplationMonth, taxaTotal, correctionIncc, tipoReducao, reducePercentage])
 
   const creditoPatrimonial = useMemo(() => {
     if (

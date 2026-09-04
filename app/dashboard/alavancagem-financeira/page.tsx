@@ -6,13 +6,14 @@ import { calculateFinancialLeverage, formatCurrency } from '@/lib/calculations'
 import { useSharedSimulationStore } from '@/lib/store'
 
 export default function AlavancagemFinanceiraPage() {
-  const { 
-    creditValue, 
+  const {
+    creditValue,
     months,
     incc,
     taxaTotal,
     contemplationMonth,
     tipoReducao,
+    reducePercentage,
     setSharedField,
   } = useSharedSimulationStore()
 
@@ -51,11 +52,12 @@ export default function AlavancagemFinanceiraPage() {
       currentMonth: _contemplationMonth,
       rentPercent: null,
       contemplationMonth: _contemplationMonth,
-      tipoReducao: _tipoReducao
+      tipoReducao: _tipoReducao,
+      reducePercentage
     })
     console.log('[PAGE - useMemo] RETORNO calculateFinancialLeverage (totalInvested):', computedResults?.totalInvested, 'profit:', computedResults?.profit)
     return computedResults
-  }, [creditValue, months, incc, taxaTotal, saleGainPercent, installmentType, contemplationMonth, tipoReducao])
+  }, [creditValue, months, incc, taxaTotal, saleGainPercent, installmentType, contemplationMonth, tipoReducao, reducePercentage])
 
   console.log('[PAGE - RENDER] results obtidos (vou usar nos cards):', { totalInvested: results?.totalInvested, profit: results?.profit, saleValue: results?.saleValue, roi: results?.roi })
 
@@ -81,7 +83,7 @@ export default function AlavancagemFinanceiraPage() {
         <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
           <span className="text-[11px] font-extrabold uppercase tracking-wider text-muted-foreground block mb-4">DADOS DA OPERAÇÃO (ALTERE OS VALORES PARA SIMULAR)</span>
           <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            
+
             {/* Crédito Original */}
             <div>
               <label className="block text-sm font-bold text-muted-foreground mb-2">Crédito Original</label>
@@ -127,8 +129,8 @@ export default function AlavancagemFinanceiraPage() {
             {/* Parcela */}
             <div>
               <label className="block text-sm font-bold text-muted-foreground mb-2">Parcela</label>
-              <select 
-                value={installmentType} 
+              <select
+                value={installmentType}
                 onChange={(e) => setInstallmentType(e.target.value)}
                 className="w-full bg-background border border-border rounded-lg px-3 py-3 text-sm font-semibold text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
               >
@@ -175,14 +177,14 @@ export default function AlavancagemFinanceiraPage() {
               {/* Custom slider track */}
               <div className="w-full h-2 bg-muted rounded-lg relative">
                 {/* Filled portion */}
-                <div 
+                <div
                   className="absolute h-full bg-[#f59e0b] rounded-lg transition-all duration-300 ease-out"
                   style={{ width: `${((contemplationMonth || 1) / (months || 220)) * 100}%` }}
                 />
 
                 {/* Custom thumb with number */}
-                <div 
-                  className="absolute top-1/2 transform -translate-x-1/2 -translate-y-1/2 flex flex-col items-center transition-all duration-300 ease-out z-10" 
+                <div
+                  className="absolute top-1/2 transform -translate-x-1/2 -translate-y-1/2 flex flex-col items-center transition-all duration-300 ease-out z-10"
                   style={{ left: `${((contemplationMonth || 1) / (months || 220)) * 100}%` }}
                 >
                   <div className="relative w-11 h-11 rounded-full flex items-center justify-center shadow-md border-2 border-[#f59e0b] font-sans">
@@ -193,12 +195,12 @@ export default function AlavancagemFinanceiraPage() {
               </div>
 
               {/* Hidden range input for interaction */}
-              <input 
-                type="range" 
-                min="1" 
-                max={months || 220} 
-                value={contemplationMonth || 1} 
-                onInput={(e: React.InputEvent<HTMLInputElement>) => syncFinInput((e.target as HTMLInputElement).value)} 
+              <input
+                type="range"
+                min="1"
+                max={months || 220}
+                value={contemplationMonth || 1}
+                onInput={(e: React.InputEvent<HTMLInputElement>) => syncFinInput((e.target as HTMLInputElement).value)}
                 className="absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer z-20"
               />
 
@@ -216,7 +218,7 @@ export default function AlavancagemFinanceiraPage() {
             {/* Esquerda: Cartões de Destaque */}
             <div className="flex-1 space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                
+
                 {/* Crédito Original */}
                 <div className="bg-card border border-border border-l-[5px] border-l-primary rounded-xl p-5 shadow-sm hover:shadow-md transition-all flex justify-between items-center font-sans">
                   <div>

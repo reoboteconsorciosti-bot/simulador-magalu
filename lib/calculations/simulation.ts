@@ -1,16 +1,35 @@
 import type { SimulationInput, SimulationResult } from '@/lib/types'
 import { calculateMonthlyInstallment, calculateFee } from './helpers'
 
+// Percentual de redução padrão da modalidade "Redução de Parcela" (era fixo em 50%, "meia" parcela)
+export const DEFAULT_REDUCE_PERCENTAGE = 50
+
+// Normaliza o % de redução vindo do input "Reduzir Parcela (%)": aceita null/undefined
+// (usa o padrão de 50%) e limita entre 0 e 100 para não gerar parcela negativa/invertida.
+export function normalizarReducePercentage(reducePercentage?: number | null): number {
+  if (reducePercentage === null || reducePercentage === undefined || isNaN(reducePercentage)) {
+    return DEFAULT_REDUCE_PERCENTAGE
+  }
+  return Math.min(100, Math.max(0, reducePercentage))
+}
+
 // 1. Calcula o fundo comum cheio
 function calcularFundoComum(credito: number, prazo: number): number {
   return credito / prazo
 }
 
-// Calcula a meia parcela conforme a lógica do usuário
-export function calcularMeiaParcela(credito: number, taxaTotal: number, prazo: number): number {
+// Calcula a parcela reduzida conforme o % informado em "Reduzir Parcela (%)"
+// (antes era sempre "meia" parcela, ou seja, reducePercentage fixo em 50%)
+export function calcularMeiaParcela(
+  credito: number,
+  taxaTotal: number,
+  prazo: number,
+  reducePercentage?: number | null
+): number {
+  const fatorReducao = 1 - normalizarReducePercentage(reducePercentage) / 100
   const totalComTaxa = credito * (1 + taxaTotal / 100)
   const parcelaIntegral = totalComTaxa / prazo
-  return parcelaIntegral / 2
+  return parcelaIntegral * fatorReducao
 }
 
 // 2. Calcula a taxa mensal (usando taxaTotal)
@@ -19,16 +38,19 @@ function calcularTaxaMensal(credito: number, taxaTotal: number, prazo: number): 
   return totalTaxa / prazo
 }
 
-// 3. Calcula a parcela inicial (meia) - redutor incide SOMENTE no fundo comum
+// 3. Calcula a parcela inicial (Fundo Comum) - redutor incide SOMENTE no fundo comum,
+// conforme o % de "Reduzir Parcela" (antes fixo em 50%)
 export function calcularParcelaInicial(
   credito: number,
   prazo: number,
   taxaTotal: number,
+  reducePercentage?: number | null
 ): number {
-  const componenteA = (credito / 2) / prazo
+  const fatorReducao = 1 - normalizarReducePercentage(reducePercentage) / 100
+  const componenteA = (credito * fatorReducao) / prazo
   const taxaMensal = (credito * (taxaTotal / 100)) / prazo
-  const parcelaInicial = componenteA + taxaMensal   
-  return parcelaInicial 
+  const parcelaInicial = componenteA + taxaMensal
+  return parcelaInicial
 }
 
 export function aplicarReajusteAnual(
@@ -51,27 +73,28 @@ export function aplicarReajusteAnual(
 export function calcularComponentesMeiaParcela(
   credito: number,
   prazo: number,
-  taxaTotal: number
+  taxaTotal: number,
+  reducePercentage?: number | null
 ): { fundoComum: number; taxaAdministracao: number } {
+  const fatorReducao = 1 - normalizarReducePercentage(reducePercentage) / 100
   return {
-    fundoComum: (credito / 2) / prazo,
+    fundoComum: (credito * fatorReducao) / prazo,
     taxaAdministracao: (credito * (taxaTotal / 100)) / prazo,
   }
 }
 
-// Função para calcular componentes de Meia Parcela (redução em ambos)
+// Função para calcular componentes de Redução de Parcela (redução em ambos, conforme % informado)
 export function calcularComponentesMeiaParcelaTotal(
   credito: number,
   prazo: number,
-  taxaTotal: number
+  taxaTotal: number,
+  reducePercentage?: number | null
 ): { fundoComum: number; taxaAdministracao: number } {
-  const totalComTaxa = credito * (1 + taxaTotal / 100)
-  const parcelaIntegral = totalComTaxa / prazo
-  const parcelaMeia = parcelaIntegral / 2
-  
-  const fundoComum = credito / prazo / 2
-  const taxaAdministracao = (credito * taxaTotal / 100) / prazo / 2
-  
+  const fatorReducao = 1 - normalizarReducePercentage(reducePercentage) / 100
+
+  const fundoComum = (credito / prazo) * fatorReducao
+  const taxaAdministracao = ((credito * taxaTotal / 100) / prazo) * fatorReducao
+
   return {
     fundoComum,
     taxaAdministracao,
@@ -85,6 +108,7 @@ export function calcularPagamentosMeiaParcelaTotalAjustada(
   taxaTotal: number,
   correctionIncc: number,
   mesContemplacao: number,
+  reducePercentage?: number | null,
 ): {
   pagamentos: number[]
   ultimaParcela: number
@@ -95,7 +119,8 @@ export function calcularPagamentosMeiaParcelaTotalAjustada(
   const { fundoComum, taxaAdministracao } = calcularComponentesMeiaParcelaTotal(
     credito,
     prazo,
-    taxaTotal
+    taxaTotal,
+    reducePercentage
   )
 
   const pagamentos: number[] = []
@@ -136,14 +161,21 @@ export function calcularPagamentosMeiaParcelaTotalAjustada(
   }
 }
 
-// Função para calcular parcela integral para Meia Parcela
+// Função para calcular parcela integral a partir dos componentes reduzidos (Redução de Parcela):
+// reconstrói o valor cheio "desfazendo" o % de redução aplicado (antes sempre *2, pois a redução era fixa em 50%)
 export function calcularParcelaIntegralMeiaParcela(
   fundoComumMeiaParcelaReajustado: number,
   taxaAdministracaoReajustada: number,
-  ajusteAmortizacao: number
+  ajusteAmortizacao: number,
+  reducePercentage?: number | null
 ): number {
-  const fundoComumIntegral = fundoComumMeiaParcelaReajustado * 2
-  const taxaAdministracaoIntegral = taxaAdministracaoReajustada * 2
+  const fatorReducao = 1 - normalizarReducePercentage(reducePercentage) / 100
+  if (fatorReducao <= 0) {
+    // Redução de 100%: não há como "desfazer" a divisão (evita divisão por zero/negativo)
+    return ajusteAmortizacao
+  }
+  const fundoComumIntegral = fundoComumMeiaParcelaReajustado / fatorReducao
+  const taxaAdministracaoIntegral = taxaAdministracaoReajustada / fatorReducao
   return fundoComumIntegral + taxaAdministracaoIntegral + ajusteAmortizacao
 }
 
@@ -151,9 +183,11 @@ export function calcularParcelaIntegralMeiaParcela(
 export function calcularAjusteAmortizacao(
   credito: number,
   prazo: number,
-  mesContemplacao: number
+  mesContemplacao: number,
+  reducePercentage?: number | null
 ): number {
-  const componenteA = (credito / 2) / prazo
+  const fatorReducao = 1 - normalizarReducePercentage(reducePercentage) / 100
+  const componenteA = (credito * fatorReducao) / prazo
   const valorInvestido = componenteA * mesContemplacao
   const parcelasRestantes = prazo - mesContemplacao
   return valorInvestido / parcelasRestantes
@@ -163,16 +197,18 @@ export function calcularAjusteAmortizacao(
 export function calcularParcelaBasePosContemplacao(
   credito: number,
   prazo: number,
-  taxaTotal: number
+  taxaTotal: number,
+  reducePercentage?: number | null
 ): number {
-  // Componente A: meia parcela do fundo comum
-  const componenteA = (credito / 2) / prazo
+  const fatorReducao = 1 - normalizarReducePercentage(reducePercentage) / 100
+  // Componente A: parcela reduzida do fundo comum
+  const componenteA = (credito * fatorReducao) / prazo
 
   // Componente B: taxa de administração mensal
   const componenteB = (credito * (taxaTotal / 100)) / prazo
 
-  // Parcela cheia do fundo comum
-  const parcelaCheia = componenteA * 2
+  // Parcela cheia do fundo comum (desfaz a redução)
+  const parcelaCheia = fatorReducao > 0 ? componenteA / fatorReducao : 0
 
   // Parcela base: parcela cheia + taxa mensal
   return parcelaCheia + componenteB
@@ -184,11 +220,14 @@ export function calcularPosContemplacao(
   prazo: number,
   taxaTotal: number,
   mesContemplacao: number,
-  inccAnual: number
+  inccAnual: number,
+  reducePercentage?: number | null
 ): number {
   const incc = inccAnual / 100
+  const percentualReducao = normalizarReducePercentage(reducePercentage)
+  const fatorReducao = 1 - percentualReducao / 100
 
-  const fundoComumBase = (credito / 2) / prazo
+  const fundoComumBase = (credito * fatorReducao) / prazo
   const taxaMensal = (credito * (taxaTotal / 100)) / prazo
   const parcelaInicialBase = fundoComumBase + taxaMensal
   const parcelaReajustada = aplicarReajusteAnual(
@@ -202,13 +241,15 @@ export function calcularPosContemplacao(
     return parcelaReajustada
   }
 
-  const metadeCredito = credito / 2
-  const metadeCreditoReajustada = aplicarReajusteAnual(
-    metadeCredito,
+  // Parte do fundo comum não acumulada ao longo do prazo por causa da redução
+  // (com reducePercentage=50%, isso é credito/2 — igual ao cálculo original)
+  const naoAcumulado = credito * (percentualReducao / 100)
+  const naoAcumuladoReajustado = aplicarReajusteAnual(
+    naoAcumulado,
     mesContemplacao,
     incc
   )
-  const calculoB = metadeCreditoReajustada / prazoRestante
+  const calculoB = naoAcumuladoReajustado / prazoRestante
 
   return calculoB + parcelaReajustada
 }
@@ -246,6 +287,7 @@ export function calcularPagamentosMeiaParcelaAjustada(
   taxaTotal: number,
   correctionIncc: number,
   mesContemplacao: number,
+  reducePercentage?: number | null,
 ): {
   pagamentos: number[]
   ultimaParcela: number
@@ -256,7 +298,8 @@ export function calcularPagamentosMeiaParcelaAjustada(
   const { fundoComum, taxaAdministracao } = calcularComponentesMeiaParcela(
     credito,
     prazo,
-    taxaTotal
+    taxaTotal,
+    reducePercentage
   )
 
   const pagamentos: number[] = []
@@ -307,23 +350,34 @@ export function calcularAjusteAmortizacaoReajustado(
   return totalInvestidoFundoComum / prazoRestante
 }
 
+// Reconstrói a parcela cheia do Fundo Comum a partir do componente reduzido
+// (antes sempre *2, pois a redução do fundo comum era fixa em 50%)
 export function calcularParcelaIntegral(
   fundoComumMeiaParcelaReajustado: number,
   taxaAdministracaoReajustada: number,
-  ajusteAmortizacao: number
+  ajusteAmortizacao: number,
+  reducePercentage?: number | null
 ): number {
-  const fundoComumIntegral = fundoComumMeiaParcelaReajustado * 2
+  const fatorReducao = 1 - normalizarReducePercentage(reducePercentage) / 100
+  const fundoComumIntegral = fatorReducao > 0 ? fundoComumMeiaParcelaReajustado / fatorReducao : 0
   return fundoComumIntegral + taxaAdministracaoReajustada + ajusteAmortizacao
 }
 
-// Helper function to calculate the additional monthly increment for Meia Parcela
+// Helper function to calculate the additional monthly increment for Redução de Parcela.
+// R = valor não pago por mês (diferença entre a parcela cheia e a parcela reduzida) × meses pré-contemplação.
+// Com reducePercentage=50 (antigo "meia parcela" fixo), a diferença não paga por mês é igual à
+// própria parcela reduzida, mantendo o cálculo idêntico ao de antes.
 function calcularIncrementoMeiaParcela(
   meiaParcelaInicial: number,
   mesContemplacao: number,
-  prazoTotal: number
+  prazoTotal: number,
+  reducePercentage?: number | null
 ): number {
   if (!mesContemplacao || mesContemplacao <= 0 || prazoTotal <= mesContemplacao) return 0
-  const R = meiaParcelaInicial * mesContemplacao
+  const percentualReducao = normalizarReducePercentage(reducePercentage)
+  if (percentualReducao <= 0 || percentualReducao >= 100) return 0
+  const naoPagoPorMes = meiaParcelaInicial * (percentualReducao / (100 - percentualReducao))
+  const R = naoPagoPorMes * mesContemplacao
   const prazoRestante = prazoTotal - mesContemplacao
   const X = R / prazoRestante
   const incrementoMensal = X / mesContemplacao
@@ -335,11 +389,12 @@ export function calcularPagamentosPosContemplacaoAjustada(
   prazo: number,
   mesContemplacao: number,
   correctionIncc: number,
-  meiaParcelaInicial?: number
+  meiaParcelaInicial?: number,
+  reducePercentage?: number | null
 ): { parcelaIntegral: number; pagamentos: number[]; ultimaParcela: number } {
   const mesesRestantes = Math.max(0, prazo - mesContemplacao)
-  const incrementoMensal = meiaParcelaInicial 
-    ? calcularIncrementoMeiaParcela(meiaParcelaInicial, mesContemplacao, prazo)
+  const incrementoMensal = meiaParcelaInicial
+    ? calcularIncrementoMeiaParcela(meiaParcelaInicial, mesContemplacao, prazo, reducePercentage)
     : 0
   
   const pagamentos: number[] = []
@@ -372,31 +427,31 @@ export function calcularPagamentosPosContemplacaoAjustada(
 //   somando as meia parcelas pré-contemplação + a parcela cheia (com o incremento que
 //   devolve "o que faltou") pós-contemplação, tudo com reajuste INCC anual.
 export function calcularTotalInvestidoCompleto(input: SimulationInput): number {
-  const { creditValue, months, contemplationMonth, taxaTotal, incc = 5, tipoReducao = 'meia-parcela' } = input
+  const { creditValue, months, contemplationMonth, taxaTotal, incc = 5, tipoReducao = 'meia-parcela', reducePercentage } = input
   const mesContemplacaoUsado = contemplationMonth ?? Math.floor(months / 2)
 
   if (tipoReducao === 'fundo-comum') {
     return calculateSimulation({ ...input, tipoReducao: 'fundo-comum' }).totalPaid
   }
 
-  // Meia Parcela — mesma base de cálculo da parcela cheia exibida (Alavancagem Patrimonial)
+  // Redução de Parcela — mesma base de cálculo da parcela cheia exibida (Alavancagem Patrimonial)
   const {
     pagamentos: pagamentosPre,
     ultimoFundoComumPago,
     ultimaTaxaAdministracaoPaga,
     totalInvestidoFundoComum,
-  } = calcularPagamentosMeiaParcelaTotalAjustada(creditValue, months, taxaTotal, incc, mesContemplacaoUsado)
+  } = calcularPagamentosMeiaParcelaTotalAjustada(creditValue, months, taxaTotal, incc, mesContemplacaoUsado, reducePercentage)
 
   const ajusteAmortizacaoReajustado = calcularAjusteAmortizacaoReajustado(
     totalInvestidoFundoComum, months, mesContemplacaoUsado)
 
   const parcelaIntegral = calcularParcelaIntegralMeiaParcela(
-    ultimoFundoComumPago, ultimaTaxaAdministracaoPaga, ajusteAmortizacaoReajustado)
+    ultimoFundoComumPago, ultimaTaxaAdministracaoPaga, ajusteAmortizacaoReajustado, reducePercentage)
 
-  const meiaParcelaInicial = calcularMeiaParcela(creditValue, taxaTotal, months)
+  const meiaParcelaInicial = calcularMeiaParcela(creditValue, taxaTotal, months, reducePercentage)
 
   const { pagamentos: pagamentosPos } = calcularPagamentosPosContemplacaoAjustada(
-    parcelaIntegral, months, mesContemplacaoUsado, incc, meiaParcelaInicial)
+    parcelaIntegral, months, mesContemplacaoUsado, incc, meiaParcelaInicial, reducePercentage)
 
   return (
     pagamentosPre.reduce((acc, val) => acc + val, 0) +
@@ -405,7 +460,7 @@ export function calcularTotalInvestidoCompleto(input: SimulationInput): number {
 }
 
 export function calculateSimulation(input: SimulationInput): SimulationResult {
-  const { creditValue, months, contemplationMonth, taxaTotal, incc = 5, tipoReducao = 'meia-parcela' } = input
+  const { creditValue, months, contemplationMonth, taxaTotal, incc = 5, tipoReducao = 'meia-parcela', reducePercentage } = input
   
   // Step 1: Total Value with Fee
   const totalValue = creditValue * (1 + taxaTotal / 100)
@@ -430,18 +485,18 @@ export function calculateSimulation(input: SimulationInput): SimulationResult {
   let totalPaid: number
 
   if (tipoReducao === 'fundo-comum') {
-    // Lógica para Fundo Comum (mantida como original)
-    firstInitialPayment = calcularParcelaInicial(creditValue, months, taxaTotal)
-    
+    // Lógica para Fundo Comum: redutor incide somente no fundo comum, conforme "Reduzir Parcela (%)"
+    firstInitialPayment = calcularParcelaInicial(creditValue, months, taxaTotal, reducePercentage)
+
     const {
       pagamentos: pagamentosPreContemplacao,
       ultimaParcela,
     } = calcularPagamentosMeiaParcelaAjustada(
-      creditValue, months, taxaTotal, incc, mesContemplacaoUsado)
+      creditValue, months, taxaTotal, incc, mesContemplacaoUsado, reducePercentage)
     finalPayment = ultimaParcela
 
     finalPaymentAfterContemplation = calcularPosContemplacao(
-      creditValue, months, taxaTotal, mesContemplacaoUsado, incc)
+      creditValue, months, taxaTotal, mesContemplacaoUsado, incc, reducePercentage)
 
     const { pagamentos, ultimaParcela: parcelaAjustada } = calcularPagamentosPosContemplacaoAjustada(
       finalPaymentAfterContemplation, months, mesContemplacaoUsado, incc)
@@ -455,8 +510,8 @@ export function calculateSimulation(input: SimulationInput): SimulationResult {
     totalPaid = totalPagoPreContemplacao + totalPagoPosContemplacao
 
   } else {
-    // Lógica para Meia Parcela usando a nova regra
-    firstInitialPayment = calcularMeiaParcela(creditValue, taxaTotal, months)
+    // Lógica para Redução de Parcela (antes fixa em "meia" parcela), usando o % de "Reduzir Parcela"
+    firstInitialPayment = calcularMeiaParcela(creditValue, taxaTotal, months, reducePercentage)
     
     // Pre-contemplação: pagamentos de meia parcela até o mês de contemplação
     const {
@@ -472,7 +527,7 @@ export function calculateSimulation(input: SimulationInput): SimulationResult {
 
     // Pagamentos pós-contemplação (com reajuste anual e o novo incremento mensal - for display)
     const { pagamentos, ultimaParcela: parcelaAjustada } = calcularPagamentosPosContemplacaoAjustada(
-      parcelaIntegralInicial, months, mesContemplacaoUsado, incc, firstInitialPayment)
+      parcelaIntegralInicial, months, mesContemplacaoUsado, incc, firstInitialPayment, reducePercentage)
     amortizacaoAjustada = pagamentos
     parcelaPosContemplacaoAjustada = parcelaAjustada
     // Use o primeiro pagamento da amortização ajustada como o valor inicial pós contemplação

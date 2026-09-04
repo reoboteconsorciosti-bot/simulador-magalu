@@ -18,6 +18,7 @@ export default function AposentadoriaPage() {
     taxaTotal,
     contemplationMonth,
     tipoReducao,
+    reducePercentage,
     setSharedField
   } = useSharedSimulationStore()
   
@@ -40,11 +41,12 @@ export default function AposentadoriaPage() {
         contemplationMonth: contemplationMonth ?? undefined,
         incc: incc ?? 5,
         taxaTotal,
-        tipoReducao
+        tipoReducao,
+        reducePercentage
       })
     }
     return null
-  }, [creditValue, months, contemplationMonth, incc, taxaTotal, tipoReducao])
+  }, [creditValue, months, contemplationMonth, incc, taxaTotal, tipoReducao, reducePercentage])
 
   // Replica exatamente o cálculo de "PARC. PÓS CONT." da Alavancagem Patrimonial
   // para que a Parcela Cheia (meia parcela) exiba o mesmo valor.
@@ -68,10 +70,11 @@ export default function AposentadoriaPage() {
         contemplationMonth,
         incc: incc ?? 5,
         tipoReducao,
+        reducePercentage,
       })
     }
     return null
-  }, [creditValue, months, taxaTotal, contemplationMonth, incc, tipoReducao])
+  }, [creditValue, months, taxaTotal, contemplationMonth, incc, tipoReducao, reducePercentage])
 
   // Total investido completo (tudo pago no plano: meia parcela + parcela cheia + "o que faltou", com INCC)
   const totalInvestidoCompleto = useMemo(() => {
@@ -90,10 +93,11 @@ export default function AposentadoriaPage() {
         incc: incc ?? 5,
         taxaTotal,
         tipoReducao,
+        reducePercentage,
       })
     }
     return null
-  }, [creditValue, months, currentMonth, incc, taxaTotal, tipoReducao])
+  }, [creditValue, months, currentMonth, incc, taxaTotal, tipoReducao, reducePercentage])
 
   const results = useMemo(() => {
     if (creditValue != null && creditValue > 0 && 

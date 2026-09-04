@@ -5,7 +5,7 @@ import {
   calcularAluguel, 
   getParcelaPosContemplacao 
 } from './leverage-helpers'
-import { calcularParcelaInicial } from './simulation'
+import { calcularParcelaInicial, normalizarReducePercentage } from './simulation'
 
 function calcularTotalInvestido(
   credito: number,
@@ -14,22 +14,24 @@ function calcularTotalInvestido(
   inccPercentual: number,
   quantidadeMeses: number,
   tipoParcela: 'Meia' | 'Cheia',
-  tipoReducao: string = 'meia-parcela'
+  tipoReducao: string = 'meia-parcela',
+  reducePercentage?: number | null
 ): { totalInvestido: number; ultimaParcela: number } {
-  console.log('[calcularTotalInvestido] ENTRADA:', { credito, prazo, taxaTotal, inccPercentual, quantidadeMeses, tipoParcela, tipoReducao })
+  console.log('[calcularTotalInvestido] ENTRADA:', { credito, prazo, taxaTotal, inccPercentual, quantidadeMeses, tipoParcela, tipoReducao, reducePercentage })
 
-  // Define a parcela base conforme a modalidade:
-  // - Fundo Comum: usa calcularParcelaInicial (fundo comum / 2 + taxa inteira), igual ao exibido na UI
-  // - Meia Parcela: usa (fundo comum / 2 + taxa / 2), igual ao exibido na UI
+  // Define a parcela base conforme a modalidade (ambas usam o % de "Reduzir Parcela"):
+  // - Fundo Comum: reduz SOMENTE o fundo comum, a taxa fica inteira, igual ao exibido na UI
+  // - Redução de Parcela: reduz o (fundo comum + taxa) juntos, igual ao exibido na UI
   let parcelaBase: number
   if (tipoReducao === 'fundo-comum') {
-    parcelaBase = calcularParcelaInicial(credito, prazo, taxaTotal)
+    parcelaBase = calcularParcelaInicial(credito, prazo, taxaTotal, reducePercentage)
     console.log('[calcularTotalInvestido] Modalidade FUNDO COMUM - parcelaBase:', parcelaBase)
   } else {
+    const fatorReducao = 1 - normalizarReducePercentage(reducePercentage) / 100
     const fundoComumMensal = credito / prazo
     const taxaMensal = (credito * (taxaTotal / 100)) / prazo
-    parcelaBase = fundoComumMensal / 2 + taxaMensal / 2
-    console.log('[calcularTotalInvestido] Modalidade MEIA PARCELA - parcelaBase:', parcelaBase)
+    parcelaBase = (fundoComumMensal + taxaMensal) * fatorReducao
+    console.log('[calcularTotalInvestido] Modalidade REDUÇÃO DE PARCELA - parcelaBase:', parcelaBase)
   }
 
   if (!quantidadeMeses || quantidadeMeses <= 0) {
@@ -87,7 +89,8 @@ export function calculateFinancialLeverage(
     currentMonth,
     rentPercent,
     contemplationMonth,
-    tipoReducao
+    tipoReducao,
+    reducePercentage
   } = input
 
   const DEFAULT_CREDIT = 110000
@@ -137,7 +140,8 @@ export function calculateFinancialLeverage(
     inccValue,
     contemplacaoUsada,
     (installmentType as 'Meia' | 'Cheia') || 'Meia',
-    tipoReducao || 'meia-parcela'
+    tipoReducao || 'meia-parcela',
+    reducePercentage
   )
   const totalInvested = totalInvestido
   console.log('[calculateFinancialLeverage] RETORNO calcularTotalInvestido:', { totalInvestido, ultimaParcela })
@@ -166,7 +170,8 @@ export function calculateFinancialLeverage(
       incc: inccValue,
       lanceEmbutido: 0,
       taxaTotal: taxaTotalValue,
-      tipoReducao: tipoReducao || 'meia-parcela'
+      tipoReducao: tipoReducao || 'meia-parcela',
+      reducePercentage
     })
     
     if (rentPercent) {

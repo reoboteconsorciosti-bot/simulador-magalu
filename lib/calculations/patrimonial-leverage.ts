@@ -106,7 +106,7 @@ function calcularRendaPassivaFinal(
 export function calculatePatrimonialLeverage(
   input: LeveragePatrimonialInput
 ): LeveragePatrimonialResult {
-  const { creditValue, months, rentPercent, correctionIncc, rentIgpPercent, currentMonth, taxaTotal, contemplationMonth, incc, tipoReducao } = input
+  const { creditValue, months, rentPercent, correctionIncc, rentIgpPercent, currentMonth, taxaTotal, contemplationMonth, incc, tipoReducao, reducePercentage } = input
   
   // Monthly installment
   const monthlyInstallment = calculateMonthlyInstallment(creditValue, months)
@@ -130,26 +130,28 @@ export function calculatePatrimonialLeverage(
   let totalInvestidoFundoComum: number
   
   if (tipoReducao === 'meia-parcela') {
-    // Lógica para Meia Parcela
+    // Lógica para Redução de Parcela
     const result = calcularPagamentosMeiaParcelaTotalAjustada(
       creditValue,
       months,
       taxaTotal,
       incc ?? 5,
-      contemplationMonth
+      contemplationMonth,
+      reducePercentage
     )
     pagamentosPreContemplacao = result.pagamentos
     ultimoFundoComumPago = result.ultimoFundoComumPago
     ultimaTaxaAdministracaoPaga = result.ultimaTaxaAdministracaoPaga
     totalInvestidoFundoComum = result.totalInvestidoFundoComum
   } else {
-    // Lógica para Fundo Comum (original)
+    // Lógica para Fundo Comum (redutor incide somente no fundo comum)
     const result = calcularPagamentosMeiaParcelaAjustada(
       creditValue,
       months,
       taxaTotal,
       incc ?? 5,
-      contemplationMonth
+      contemplationMonth,
+      reducePercentage
     )
     pagamentosPreContemplacao = result.pagamentos
     ultimoFundoComumPago = result.ultimoFundoComumPago
@@ -168,13 +170,15 @@ export function calculatePatrimonialLeverage(
     parcelaIntegral = calcularParcelaIntegralMeiaParcela(
       ultimoFundoComumPago,
       ultimaTaxaAdministracaoPaga,
-      ajusteAmortizacaoReajustado
+      ajusteAmortizacaoReajustado,
+      reducePercentage
     )
   } else {
     parcelaIntegral = calcularParcelaIntegral(
       ultimoFundoComumPago,
       ultimaTaxaAdministracaoPaga,
-      ajusteAmortizacaoReajustado
+      ajusteAmortizacaoReajustado,
+      reducePercentage
     )
   }
 
@@ -182,7 +186,7 @@ export function calculatePatrimonialLeverage(
   // 1. With monthly increment for displaying parcelaPosContemplacaoAjustada
   // 2. Without monthly increment for calculating totalPagoConsorcio (same logic as fundo comum)
   const meiaParcelaInicial = tipoReducao === 'meia-parcela'
-    ? calcularMeiaParcela(creditValue, taxaTotal, months)
+    ? calcularMeiaParcela(creditValue, taxaTotal, months, reducePercentage)
     : undefined
 
   const {
@@ -194,6 +198,7 @@ export function calculatePatrimonialLeverage(
     contemplationMonth,
     incc ?? 5,
     meiaParcelaInicial,
+    reducePercentage,
   )
   
   // For totalPagoConsorcio, use the same logic as fundo comum (no monthly increment)

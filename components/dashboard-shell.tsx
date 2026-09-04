@@ -60,9 +60,9 @@ export function DashboardShell({ children, initialUser }: DashboardShellProps) {
 
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen().catch(() => {})
+      document.documentElement.requestFullscreen().catch(() => { })
     } else {
-      document.exitFullscreen().catch(() => {})
+      document.exitFullscreen().catch(() => { })
     }
   }
 
@@ -99,7 +99,7 @@ export function DashboardShell({ children, initialUser }: DashboardShellProps) {
           <div>
             <span className="text-xs uppercase tracking-widest font-extrabold text-blue-600">SISTEMA INTEGRADO</span>
             <h1 className="text-lg font-black tracking-tight flex items-center gap-1.5 text-foreground">
-              REOBOTE <span className="font-light text-muted-foreground">CONSÓRCIOS</span>
+              MÉTODO <span className="font-light text-muted-foreground">3A </span>
             </h1>
           </div>
         </div>

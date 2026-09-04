@@ -46,6 +46,7 @@ export interface SimulationInput {
   lanceEmbutido?: number
   taxaTotal: number
   tipoReducao?: string
+  reducePercentage?: number | null
 }
 
 export interface SimulationResult {
@@ -74,6 +75,7 @@ export interface LeverageFinancialInput {
   rentPercent?: number | null; // Novo campo para percentual de aluguel
   contemplationMonth?: number | null; // Novo campo para mês de contemplação
   tipoReducao?: string; // Modalidade: "fundo-comum" ou "meia-parcela"
+  reducePercentage?: number | null; // % de redução da parcela na modalidade "Redução de Parcela"
 }
 
 export interface LeverageFinancialResult {
@@ -103,6 +105,7 @@ export interface LeveragePatrimonialInput {
   contemplationMonth: number;
   incc?: number;
   tipoReducao?: string; // Modalidade: "fundo-comum" ou "meia-parcela"
+  reducePercentage?: number | null; // % de redução da parcela na modalidade "Redução de Parcela"
 }
 
 export interface AmortizationRow {
