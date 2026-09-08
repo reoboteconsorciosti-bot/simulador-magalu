@@ -330,7 +330,7 @@ export default function SimulacaoPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="fundo-comum">Fundo Comum</SelectItem>
-                  <SelectItem value="meia-parcela">Redução de Parcela</SelectItem>
+                  <SelectItem value="meia-parcela">Parcela total</SelectItem>
                 </SelectContent>
               </Select>
             </div>
