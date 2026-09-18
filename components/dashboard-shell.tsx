@@ -112,13 +112,13 @@ export function DashboardShell({ children, initialUser }: DashboardShellProps) {
                 key={item.name}
                 href={item.href}
                 className={cn(
-                  'px-4 py-2.5 rounded-lg text-sm font-semibold transition-all duration-300 flex items-center gap-2',
+                  'px-4 py-2.5 rounded-lg text-base font-semibold transition-all duration-300 flex items-center gap-2',
                   isActive
                     ? 'text-white bg-blue-600 shadow-md'
                     : 'text-muted-foreground hover:text-foreground hover:bg-background'
                 )}
               >
-                <item.icon className="h-4 w-4" />
+                <item.icon className="h-5 w-5" />
                 {item.name}
               </Link>
             )

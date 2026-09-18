@@ -149,14 +149,14 @@ export default function AlavancagemPatrimonialPage() {
                 decimalScale={2}
                 fixedDecimalScale
                 allowNegative={false}
-                className="w-full bg-background border border-border rounded-lg px-3 py-3 text-sm font-semibold text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
+                className="w-full bg-background border border-border rounded-lg px-3 py-3 text-lg font-bold text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
               />
             </div>
 
             {/* Modalidade */}
             <div>
               <label className="block text-sm font-bold text-muted-foreground mb-2">Modalidade</label>
-              <div className="w-full bg-background border border-border rounded-lg px-3 py-3 text-sm font-semibold text-foreground">
+              <div className="w-full bg-background border border-border rounded-lg px-3 py-3 text-lg font-bold text-foreground">
                 Sorteio
               </div>
             </div>
@@ -171,7 +171,7 @@ export default function AlavancagemPatrimonialPage() {
                 decimalScale={0}
                 min={1}
                 max={months || 220}
-                className="w-full bg-background border border-border rounded-lg px-3 py-3 text-sm font-semibold text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
+                className="w-full bg-background border border-border rounded-lg px-3 py-3 text-lg font-bold text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
               />
             </div>
 
@@ -185,7 +185,7 @@ export default function AlavancagemPatrimonialPage() {
                 suffix="%"
                 decimalScale={2}
                 allowNegative={false}
-                className="w-full bg-background border border-border rounded-lg px-3 py-3 text-sm font-semibold text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
+                className="w-full bg-background border border-border rounded-lg px-3 py-3 text-lg font-bold text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
               />
             </div>
 
@@ -199,7 +199,7 @@ export default function AlavancagemPatrimonialPage() {
                 suffix="%"
                 decimalScale={2}
                 allowNegative={false}
-                className="w-full bg-background border border-border rounded-lg px-3 py-3 text-sm font-semibold text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
+                className="w-full bg-background border border-border rounded-lg px-3 py-3 text-lg font-bold text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
               />
             </div>
 
@@ -213,7 +213,7 @@ export default function AlavancagemPatrimonialPage() {
                 suffix="%"
                 decimalScale={2}
                 allowNegative={false}
-                className="w-full bg-background border border-border rounded-lg px-3 py-3 text-sm font-semibold text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
+                className="w-full bg-background border border-border rounded-lg px-3 py-3 text-lg font-bold text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
               />
             </div>
 
@@ -228,7 +228,7 @@ export default function AlavancagemPatrimonialPage() {
                 suffix="%"
                 decimalScale={2}
                 allowNegative={false}
-                className="w-full bg-background border border-border rounded-lg px-3 py-3 text-sm font-semibold text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
+                className="w-full bg-background border border-border rounded-lg px-3 py-3 text-lg font-bold text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
               />
             </div>
           </div>
@@ -303,21 +303,21 @@ export default function AlavancagemPatrimonialPage() {
                 <div className="flex flex-col gap-2.5 mt-4">
                   <div className="bg-white rounded-2xl py-5 px-4 shadow-sm flex flex-col justify-center min-h-[112px]">
                     <span className="text-[13px] font-extrabold text-slate-400 uppercase tracking-wider">CRED. CONT</span>
-                    <div className="text-xl font-black text-[#1b54b8] tracking-tight leading-tight mt-0.5">
+                    <div className="text-3xl font-black text-[#1b54b8] tracking-tight leading-tight mt-0.5">
                       {formatCurrency(creditoContemplado)}
                     </div>
                   </div>
 
                   <div className="bg-white rounded-2xl py-5 px-4 shadow-sm flex flex-col justify-center min-h-[112px]">
                     <span className="text-[13px] font-extrabold text-slate-400 uppercase tracking-wider">PRAZO RES.T</span>
-                    <div className="text-xl font-black text-slate-900 tracking-tight leading-tight mt-0.5">
+                    <div className="text-3xl font-black text-slate-900 tracking-tight leading-tight mt-0.5">
                       {prazoRestante} meses
                     </div>
                   </div>
 
                   <div className="bg-white rounded-2xl py-5 px-4 shadow-sm flex flex-col justify-center min-h-[112px]">
                     <span className="text-[13px] font-extrabold text-slate-400 uppercase tracking-wider">PARC. PÓS CONT.</span>
-                    <div className="text-xl font-black text-slate-900 tracking-tight leading-tight mt-0.5">
+                    <div className="text-3xl font-black text-slate-900 tracking-tight leading-tight mt-0.5">
                       {formatCurrency(parcelaPosContemplacao)}
                     </div>
                   </div>
@@ -373,15 +373,15 @@ export default function AlavancagemPatrimonialPage() {
                 </div>
                 <div className="bg-white rounded-2xl py-2.5 px-4 shadow-sm flex flex-col justify-center min-h-[62px]">
                   <span className="text-[13px] font-extrabold text-slate-400 uppercase tracking-wider">VALOR IMÓVEL</span>
-                  <div className="text-xl font-black text-[#e07a1b] tracking-tight leading-tight mt-0.5">{formatCurrency(creditoContemplado)}</div>
+                  <div className="text-2xl font-black text-[#e07a1b] tracking-tight leading-tight mt-0.5">{formatCurrency(creditoContemplado)}</div>
                 </div>
                 <div className="bg-white rounded-2xl py-2.5 px-4 shadow-sm flex flex-col justify-center min-h-[62px]">
                   <span className="text-[13px] font-extrabold text-slate-400 uppercase tracking-wider">ALUGUEL INICIAL</span>
-                  <div className="text-xl font-black text-slate-900 tracking-tight leading-tight mt-0.5">{formatCurrency(aluguelInicial)}</div>
+                  <div className="text-2xl font-black text-slate-900 tracking-tight leading-tight mt-0.5">{formatCurrency(aluguelInicial)}</div>
                 </div>
                 <div className={`bg-white rounded-2xl py-2 px-4 shadow-sm flex flex-col justify-center min-h-[66px] border-[2.5px] ${isSobraInicial ? 'border-[#1b4fab]' : 'border-rose-600'}`}>
                   <span className="text-[13px] font-extrabold text-slate-400 uppercase tracking-wider">SOBRAS OU DESEMBOLSO</span>
-                  <div className={`text-xl font-black tracking-tight leading-none mt-0.5 ${isSobraInicial ? 'text-[#1b4fab]' : 'text-rose-700'}`}>{formatCurrency(Math.abs(sobrasOuDesembolso))}</div>
+                  <div className={`text-2xl font-black tracking-tight leading-none mt-0.5 ${isSobraInicial ? 'text-[#1b4fab]' : 'text-rose-700'}`}>{formatCurrency(Math.abs(sobrasOuDesembolso))}</div>
                   <span className="text-[13px] font-black text-slate-400 uppercase tracking-wider mt-0.5">
                     {isSobraInicial ? 'SALDO POSITIVO INICIAL' : 'APORTE INICIAL NECESSÁRIO'}
                   </span>
@@ -408,25 +408,25 @@ export default function AlavancagemPatrimonialPage() {
               <div className="flex flex-col gap-2.5 mt-4">
                 <div className="bg-white rounded-2xl py-2.5 px-4 shadow-sm flex flex-col justify-center min-h-[62px]">
                   <span className="text-[13px] font-extrabold text-slate-400 uppercase tracking-wider">VALOR IMÓV ATUALIZADO</span>
-                  <div className="text-xl font-black text-slate-900 tracking-tight leading-tight mt-0.5">{formatCurrency(valorAtualizadoImovel)}</div>
+                  <div className="text-2xl font-black text-slate-900 tracking-tight leading-tight mt-0.5">{formatCurrency(valorAtualizadoImovel)}</div>
                 </div>
                 <div className="bg-white rounded-2xl py-2.5 px-4 shadow-sm flex flex-col justify-center min-h-[62px]">
                   <span className="text-[13px] font-extrabold text-slate-400 uppercase tracking-wider">ALUGUEL RECEBIDO</span>
-                  <div className="text-xl font-black text-slate-900 tracking-tight leading-tight mt-0.5">{formatCurrency(alugueisRecebidos)}</div>
+                  <div className="text-2xl font-black text-slate-900 tracking-tight leading-tight mt-0.5">{formatCurrency(alugueisRecebidos)}</div>
                 </div>
                 <div className="bg-white rounded-2xl py-2.5 px-4 shadow-sm flex flex-col justify-center min-h-[62px]">
                   <span className="text-[13px] font-extrabold text-slate-400 uppercase tracking-wider">TOTAL PAGO CONSÓRCIO</span>
-                  <div className="text-xl font-black text-slate-900 tracking-tight leading-tight mt-0.5">{formatCurrency(totalPagoConsorcio)}</div>
+                  <div className="text-2xl font-black text-slate-900 tracking-tight leading-tight mt-0.5">{formatCurrency(totalPagoConsorcio)}</div>
                 </div>
                 <div className={`bg-white rounded-2xl py-2.5 px-4 shadow-sm flex flex-col justify-center min-h-[62px] border-[2px] ${isLucro ? 'border-emerald-500' : 'border-red-500'}`}>
                   <span className={`text-[13px] font-extrabold uppercase tracking-wider ${isLucro ? 'text-emerald-500' : 'text-red-500'}`}>{isLucro ? 'LUCRO' : 'CUSTO'}</span>
-                  <div className={`text-xl font-black tracking-tight leading-tight mt-0.5 ${isLucro ? 'text-emerald-600' : 'text-red-600'}`}>
+                  <div className={`text-2xl font-black tracking-tight leading-tight mt-0.5 ${isLucro ? 'text-emerald-600' : 'text-red-600'}`}>
                     {formatCurrency(lucroCustoFinal)}
                   </div>
                 </div>
                 <div className="bg-white rounded-2xl py-2.5 px-4 shadow-sm flex flex-col justify-center min-h-[62px]">
                   <span className="text-[13px] font-extrabold text-slate-400 uppercase tracking-wider">% PAGO</span>
-                  <div className="text-xl font-black text-slate-900 tracking-tight leading-tight mt-0.5">{percentPagoImovel.toFixed(1)}%</div>
+                  <div className="text-2xl font-black text-slate-900 tracking-tight leading-tight mt-0.5">{percentPagoImovel.toFixed(1)}%</div>
                 </div>
               </div>
               <div className="flex-1" />
@@ -451,7 +451,7 @@ export default function AlavancagemPatrimonialPage() {
                 {/* Patrimonio Imobiliario */}
                 <div className="bg-[#1a56db] rounded-2xl p-4 shadow-md flex flex-col gap-0.5">
                   <span className="text-[13px] font-bold text-blue-200 uppercase tracking-wider">Patrimônio Imobiliário</span>
-                  <div className="text-2xl font-black text-white tracking-tight mt-1">{formatCurrency(patrimonioImobiliario)}</div>
+                  <div className="text-3xl font-black text-white tracking-tight mt-1">{formatCurrency(patrimonioImobiliario)}</div>
                   <span className="text-[13px] font-semibold text-blue-200 mt-0.5">Ativo Consolidado da Operação</span>
                 </div>
                 {/* Sinal de Mais */}
@@ -461,7 +461,7 @@ export default function AlavancagemPatrimonialPage() {
                 {/* Renda Passiva */}
                 <div className="bg-[#0e9f6e] rounded-2xl p-5 shadow-md flex flex-col gap-0.5">
                   <span className="text-[13px] font-bold text-emerald-100 uppercase tracking-wider">Renda Passiva</span>
-                  <div className="text-2xl font-black text-white tracking-tight mt-1">{formatCurrency(rendaPassivaFinal)}</div>
+                  <div className="text-3xl font-black text-white tracking-tight mt-1">{formatCurrency(rendaPassivaFinal)}</div>
                 </div>
                 {/* Patrim Acumulado dos Lucros (só aparece se houver sobra positiva) */}
                 {isSobraInicial && patrimonioAcumuladoLucros > 0 && !!aplicacaoMensal && (

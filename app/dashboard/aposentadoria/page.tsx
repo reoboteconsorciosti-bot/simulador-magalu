@@ -252,7 +252,7 @@ export default function AposentadoriaPage() {
             <div className="border-[2px] border-primary rounded-xl p-5 flex justify-between items-center bg-card shadow-sm hover:shadow-md transition-all font-sans">
               <div className="space-y-1">
                 <span className="text-[9px] font-extrabold text-muted-foreground uppercase tracking-widest">CRÉDITO CONTEMPLADO</span>
-                <div className="text-xl md:text-2xl font-black text-foreground">{formatCurrency(results?.creditContemplado ?? 0)}</div>
+                <div className="text-3xl md:text-4xl font-black text-foreground">{formatCurrency(results?.creditContemplado ?? 0)}</div>
               </div>
               <div className="w-12 h-12 shrink-0 text-primary bg-primary/10 rounded-full border border-primary/20 flex items-center justify-center">
                 <CheckCircle2 className="w-7 h-7" strokeWidth={2.4} />
@@ -263,7 +263,7 @@ export default function AposentadoriaPage() {
             <div className="border-[2px] border-primary rounded-xl p-5 flex justify-between items-center bg-card shadow-sm hover:shadow-md transition-all font-sans">
               <div className="space-y-1">
                 <span className="text-[9px] font-extrabold text-muted-foreground uppercase tracking-widest">VALOR CORRIGIDO</span>
-                <div className="text-xl md:text-2xl font-black text-foreground">{formatCurrency(results?.valorCorrigido ?? 0)}</div>
+                <div className="text-3xl md:text-4xl font-black text-foreground">{formatCurrency(results?.valorCorrigido ?? 0)}</div>
               </div>
               <div className="relative w-12 h-12 shrink-0 text-primary bg-primary/10 rounded-full border border-primary/40 flex items-center justify-center">
                 <RefreshCw className="absolute w-8 h-8" strokeWidth={2.1} />
@@ -275,7 +275,7 @@ export default function AposentadoriaPage() {
             <div className="border-[2px] border-[#f59e0b] rounded-xl p-5 flex justify-between items-center bg-card shadow-sm hover:shadow-md transition-all font-sans">
               <div className="space-y-1">
                 <span className="text-[9px] font-extrabold text-muted-foreground uppercase tracking-widest">PARCELA CHEIA</span>
-                <div className="text-xl md:text-2xl font-black text-foreground">{formatCurrency((tipoReducao !== 'fundo-comum' ? patrimonialResults?.parcelaPosContemplacaoAjustada : simulationResults?.finalPaymentAfterContemplation) ?? 0)}</div>
+                <div className="text-3xl md:text-4xl font-black text-foreground">{formatCurrency((tipoReducao !== 'fundo-comum' ? patrimonialResults?.parcelaPosContemplacaoAjustada : simulationResults?.finalPaymentAfterContemplation) ?? 0)}</div>
               </div>
               <div className="w-12 h-12 shrink-0 text-[#f59e0b] bg-[#f59e0b]/10 rounded-full border border-[#f59e0b]/20 flex items-center justify-center">
                 <Calculator className="w-7 h-7" strokeWidth={2.1} />
@@ -286,7 +286,7 @@ export default function AposentadoriaPage() {
             <div className="border-[2px] border-emerald-500 rounded-xl p-5 flex justify-between items-center bg-card shadow-sm hover:shadow-md transition-all font-sans">
               <div className="space-y-1">
                 <span className="text-[9px] font-extrabold text-muted-foreground uppercase tracking-widest">LUCRO LÍQUIDO</span>
-                <div className="text-xl md:text-2xl font-black text-emerald-600 dark:text-emerald-400">{formatCurrency(totalInvestidoCompleto != null && results ? (results.valorCorrigido - totalInvestidoCompleto) : results?.lucro ?? 0)}</div>
+                <div className="text-3xl md:text-4xl font-black text-emerald-600 dark:text-emerald-400">{formatCurrency(totalInvestidoCompleto != null && results ? (results.valorCorrigido - totalInvestidoCompleto) : results?.lucro ?? 0)}</div>
               </div>
               <div className="w-12 h-12 shrink-0 text-emerald-500 bg-emerald-500/10 rounded-full border border-emerald-500/20 flex items-center justify-center">
                 <HandCoins className="w-7 h-7" strokeWidth={2.1} />
@@ -297,7 +297,7 @@ export default function AposentadoriaPage() {
             <div className="border-[2px] border-slate-400 dark:border-slate-600 rounded-xl p-5 flex justify-between items-center bg-card shadow-sm hover:shadow-md transition-all font-sans">
               <div className="space-y-1">
                 <span className="text-[9px] font-extrabold text-muted-foreground uppercase tracking-widest">ICC ANUAL(%)</span>
-                <div className="text-xl md:text-2xl font-black text-foreground">{`${(incc ?? 5).toFixed(4).replace('.', ',')}%`}</div>
+                <div className="text-3xl md:text-4xl font-black text-foreground">{`${(incc ?? 5).toFixed(4).replace('.', ',')}%`}</div>
               </div>
             </div>
 
@@ -305,7 +305,7 @@ export default function AposentadoriaPage() {
             <div className="border-[2px] border-slate-400 dark:border-slate-600 rounded-xl p-5 flex justify-between items-center bg-card shadow-sm hover:shadow-md transition-all">
               <div className="space-y-1">
                 <span className="text-[9px] font-extrabold text-muted-foreground uppercase tracking-widest">TOTAL INVESTIDO</span>
-                <div className="text-xl md:text-2xl font-black text-foreground">{formatCurrency((totalInvestidoCompleto ?? results?.totalInvestido) ?? 0)}</div>
+                <div className="text-3xl md:text-4xl font-black text-foreground">{formatCurrency((totalInvestidoCompleto ?? results?.totalInvestido) ?? 0)}</div>
               </div>
             </div>
           </div>

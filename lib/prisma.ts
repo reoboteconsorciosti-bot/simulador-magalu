@@ -6,6 +6,7 @@ const prismaClientSingleton = () => {
     connectionString: process.env.DATABASE_URL,
   });
   return new PrismaClient({ adapter });
+
 };
 
 declare const globalThis: {

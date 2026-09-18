@@ -223,7 +223,7 @@ export default function AlavancagemFinanceiraPage() {
                 <div className="bg-card border border-border border-l-[5px] border-l-primary rounded-xl p-5 shadow-sm hover:shadow-md transition-all flex justify-between items-center font-sans">
                   <div>
                     <span className="text-[9px] font-extrabold text-muted-foreground uppercase tracking-widest block">CRÉDITO ORIGINAL</span>
-                    <div className="text-xl font-black text-foreground mt-1">{formatCurrency(results?.creditValueOriginal || 0)}</div>
+                    <div className="text-3xl font-black text-foreground mt-1">{formatCurrency(results?.creditValueOriginal || 0)}</div>
                   </div>
                   <div className="p-2.5 rounded-full flex items-center justify-center">
                     <img src="/icons/mão.png" alt="Mão" className="w-15 h-15 object-contain" />
@@ -234,7 +234,7 @@ export default function AlavancagemFinanceiraPage() {
                 <div className="bg-card border border-border border-l-[5px] border-l-primary rounded-xl p-5 shadow-sm hover:shadow-md transition-all flex justify-between items-center font-sans">
                   <div>
                     <span className="text-[9px] font-extrabold text-muted-foreground uppercase tracking-widest block">CRÉDITO COM INCC</span>
-                    <div className="text-xl font-black text-foreground mt-1">{formatCurrency(results?.creditValueWithIncc || 0)}</div>
+                    <div className="text-3xl font-black text-foreground mt-1">{formatCurrency(results?.creditValueWithIncc || 0)}</div>
                   </div>
                   <div className="p-2.5 rounded-full flex items-center justify-center">
                     <img src="/icons/CASA.png" alt="casa" className="w-15 h-15 object-contain" />
@@ -245,7 +245,7 @@ export default function AlavancagemFinanceiraPage() {
                 <div className="bg-card border border-border border-l-[5px] border-l-[#f59e0b] rounded-xl p-5 shadow-sm hover:shadow-md transition-all flex justify-between items-center font-sans">
                   <div>
                     <span className="text-[9px] font-extrabold text-muted-foreground uppercase tracking-widest block">TOTAL INVESTIDO</span>
-                    <div className="text-xl font-black text-foreground mt-1">{formatCurrency(results?.totalInvested || 0)}</div>
+                    <div className="text-3xl font-black text-foreground mt-1">{formatCurrency(results?.totalInvested || 0)}</div>
                   </div>
                   <div className="p-2.5 rounded-full flex items-center justify-center">
                     <img src="/icons/Vector Smart Object.png" alt="Vector Smart Object" className="w-20 h-20 object-contain" />
@@ -256,7 +256,7 @@ export default function AlavancagemFinanceiraPage() {
                 <div className="bg-card border border-border border-l-[5px] border-l-[#f59e0b] rounded-xl p-5 shadow-sm hover:shadow-md transition-all flex justify-between items-center font-sans">
                   <div>
                     <span className="text-[9px] font-extrabold text-muted-foreground uppercase tracking-widest block">VALOR DA VENDA</span>
-                    <div className="text-xl font-black text-foreground mt-1">{formatCurrency(results?.saleValue || 0)}</div>
+                    <div className="text-3xl font-black text-foreground mt-1">{formatCurrency(results?.saleValue || 0)}</div>
                   </div>
                   <div className="p-2.5 rounded-full flex items-center justify-center">
                     <img src="/icons/MOEDA.png" alt="Moeda" className="w-15 h-15 object-contain" />
@@ -268,7 +268,7 @@ export default function AlavancagemFinanceiraPage() {
               <div className="bg-card border border-border border-l-[5px] border-l-emerald-500 rounded-xl p-5 shadow-sm hover:shadow-md transition-all flex justify-between items-center font-sans">
                 <div>
                   <span className="text-[9px] font-extrabold text-emerald-500 dark:text-emerald-400 uppercase tracking-widest block">LUCRO LÍQUIDO NA VENDA</span>
-                  <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-1">{formatCurrency(results?.profit || 0)}</div>
+                  <div className="text-4xl font-black text-emerald-600 dark:text-emerald-400 mt-1">{formatCurrency(results?.profit || 0)}</div>
                 </div>
                 <div className="p-3 rounded-full flex items-center justify-center shadow-inner">
                   <img src="/icons/MOEDA.png" alt="Moeda" className="w-15 h-15 object-contain" />

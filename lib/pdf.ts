@@ -23,7 +23,7 @@ export function generateSimulationPDF(params: GeneratePDFParams) {
   const { clientName, creditValue, months, contemplationMonth, incc, lanceEmbutido, taxaTotal, tipoReducao, results, user } = params
   const doc = new jsPDF()
   const pageWidth = doc.internal.pageSize.getWidth()
-  
+
   // Colors - Identidade Visual Reobote Consórcios
   const primaryColor: [number, number, number] = [0, 150, 255] // Azul Neon Reobote
   const secondaryColor: [number, number, number] = [20, 40, 80] // Azul Escuro
@@ -34,16 +34,16 @@ export function generateSimulationPDF(params: GeneratePDFParams) {
   // Header
   doc.setFillColor(...primaryColor)
   doc.rect(0, 0, pageWidth, 40, 'F')
-  
+
   doc.setTextColor(255, 255, 255)
   doc.setFontSize(24)
   doc.setFont('helvetica', 'bold')
   doc.text('Reobote Consórcios', 20, 20)
-  
+
   doc.setFontSize(12)
   doc.setFont('helvetica', 'normal')
   doc.text('Proposta Magalu Consórcio', 20, 30)
-  
+
   // Date
   doc.setFontSize(10)
   doc.text(format(new Date(), "dd 'de' MMMM 'de' yyyy", { locale: ptBR }), pageWidth - 20, 20, { align: 'right' })
@@ -53,7 +53,7 @@ export function generateSimulationPDF(params: GeneratePDFParams) {
   doc.setFontSize(14)
   doc.setFont('helvetica', 'bold')
   doc.text('Dados do Cliente', 20, 55)
-  
+
   doc.setFontSize(11)
   doc.setFont('helvetica', 'normal')
   doc.text(`Nome: ${clientName}`, 20, 65)
@@ -74,6 +74,8 @@ export function generateSimulationPDF(params: GeneratePDFParams) {
       ['INCC', `${incc.toFixed(2).replace('.', ',')}%`],
       ['Lance Embutido', `${lanceEmbutido.toFixed(2).replace('.', ',')}%`],
       ['Taxa Total', `${taxaTotal.toFixed(2).replace('.', ',')}%`],
+
+      
     ],
     theme: 'striped',
     headStyles: { fillColor: primaryColor },
@@ -82,7 +84,7 @@ export function generateSimulationPDF(params: GeneratePDFParams) {
 
   // Results
   const finalY = (doc as typeof doc & { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 15
-  
+
   doc.setFontSize(14)
   doc.setFont('helvetica', 'bold')
   doc.text('Resultado da Simulação', 20, finalY)
@@ -102,7 +104,7 @@ export function generateSimulationPDF(params: GeneratePDFParams) {
     headStyles: { fillColor: primaryColor },
     margin: { left: 20, right: 20 },
     bodyStyles: { fontSize: 11 },
-    didParseCell: function(data) {
+    didParseCell: function (data) {
       if (data.row.index === 3 || data.row.index === 4) {
         data.cell.styles.fontStyle = 'bold'
         data.cell.styles.fillColor = [220, 240, 255]
@@ -116,12 +118,12 @@ export function generateSimulationPDF(params: GeneratePDFParams) {
   doc.setDrawColor(...primaryColor)
   doc.setLineWidth(0.5)
   doc.line(20, footerY, pageWidth - 20, footerY)
-  
+
   doc.setTextColor(...darkGray)
   doc.setFontSize(10)
   doc.setFont('helvetica', 'bold')
   doc.text('Consultor', 20, footerY + 10)
-  
+
   doc.setFont('helvetica', 'normal')
   doc.setFontSize(9)
   doc.text(`Nome: ${user.name}`, 20, footerY + 18)

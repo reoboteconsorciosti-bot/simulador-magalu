@@ -319,7 +319,7 @@ export default function SimulacaoPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="tipoReducao">Modalidade</Label>
+              <Label htmlFor="tipoReducao">Redução sobre</Label>
               <Select
                 key={`tipoReducao-${clearKey}`}
                 value={tipoReducao}
@@ -334,6 +334,7 @@ export default function SimulacaoPage() {
                 </SelectContent>
               </Select>
             </div>
+
             <div className="flex flex-col gap-2">
               <Label htmlFor="sellerName">Reduzir Parcela (%)</Label>
               <NumericFormat
