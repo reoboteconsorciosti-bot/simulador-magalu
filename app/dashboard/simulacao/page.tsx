@@ -39,6 +39,7 @@ export default function SimulacaoPage() {
     taxaTotal,
     reducePercentage,
     tipoReducao,
+    modalidade,
     isLoading,
     setSharedField,
     clearSharedFields
@@ -339,6 +340,23 @@ export default function SimulacaoPage() {
                 </SelectContent>
               </Select>
             </div>
+
+            {/* <div className="space-y-2">
+              <Label htmlFor="modalidade">Modalidade</Label>
+              <Select
+                key={`modalidade-${clearKey}`}
+                value={modalidade}
+                onValueChange={(value) => setSharedField('modalidade', value)}
+              >
+                <SelectTrigger id="modalidade" className="h-11 text-lg md:text-lg font-bold">
+                  <SelectValue placeholder="Selecione a modalidade" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="sorteio">Sorteio</SelectItem>
+                  <SelectItem value="lance-embutido">Lance embutido</SelectItem>
+                </SelectContent>
+              </Select>
+            </div> */}
 
             <div className="flex flex-col gap-2">
               <Label htmlFor="sellerName">Reduzir Parcela (%)</Label>

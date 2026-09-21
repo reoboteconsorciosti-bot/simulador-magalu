@@ -14,6 +14,7 @@ interface SharedSimulationState {
   taxaTotal: number | null
   reducePercentage: number | null
   tipoReducao: string
+  modalidade: string
   isLoading: boolean
   setSharedField: <K extends keyof SharedSimulationState>(key: K, value: SharedSimulationState[K]) => void
   clearSharedFields: () => void
@@ -141,14 +142,15 @@ export const useSimulationStore = create<SimulationState>()(
 export const useSharedSimulationStore = create<SharedSimulationState>()(
   (set) => ({
     clientName: '',
-    creditValue: 110000,
-    months: 220,
+    creditValue: 220000,
+    months: 240,
     contemplationMonth: 49,
     incc: 5,
     lanceEmbutido: 0,
-    taxaTotal: 27,
+    taxaTotal: 25.5,
     reducePercentage: 50,
     tipoReducao: 'meia-parcela',
+    modalidade: 'sorteio',
     isLoading: false,
     setSharedField: (key, value) => {
       // Campos numéricos aceitam `null` enquanto o usuário está digitando/apagando
@@ -176,14 +178,15 @@ export const useSharedSimulationStore = create<SharedSimulationState>()(
       console.log('🧹 Limpando todos os campos na store...')
       set({
         clientName: '',
-        creditValue: 110000,
-        months: 220,
+        creditValue: 220000,
+        months: 240,
         contemplationMonth: 49,
         incc: 5,
         lanceEmbutido: 0,
-        taxaTotal: 27,
+        taxaTotal: 25.5,
         reducePercentage: 50,
         tipoReducao: 'meia-parcela',
+        modalidade: 'sorteio',
         isLoading: false,
       })
     },
