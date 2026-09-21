@@ -96,7 +96,7 @@ export default function AlavancagemFinanceiraPage() {
                 decimalScale={2}
                 fixedDecimalScale
                 allowNegative={false}
-                className="w-full bg-background border border-border rounded-lg px-3 py-3 text-sm font-semibold text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
+                className="w-full bg-background border border-border rounded-lg px-3 py-3 text-xl font-bold text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
               />
             </div>
 
@@ -108,7 +108,7 @@ export default function AlavancagemFinanceiraPage() {
                 onValueChange={(values) => setSharedField('months', values.floatValue ?? null)}
                 allowNegative={false}
                 decimalScale={0}
-                className="w-full bg-background border border-border rounded-lg px-3 py-3 text-sm font-semibold text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
+                className="w-full bg-background border border-border rounded-lg px-3 py-3 text-xl font-bold text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
               />
             </div>
 
@@ -122,7 +122,7 @@ export default function AlavancagemFinanceiraPage() {
                 suffix="%"
                 decimalScale={2}
                 allowNegative={false}
-                className="w-full bg-background border border-border rounded-lg px-3 py-3 text-sm font-semibold text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
+                className="w-full bg-background border border-border rounded-lg px-3 py-3 text-xl font-bold text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
               />
             </div>
 
@@ -132,7 +132,7 @@ export default function AlavancagemFinanceiraPage() {
               <select
                 value={installmentType}
                 onChange={(e) => setInstallmentType(e.target.value)}
-                className="w-full bg-background border border-border rounded-lg px-3 py-3 text-sm font-semibold text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
+                className="w-full bg-background border border-border rounded-lg px-3 py-3 text-xl font-bold text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
               >
                 <option value="Meia">Parcela Reduzida</option>
                 <option value="Cheia">Parcela Cheia</option>
@@ -142,7 +142,7 @@ export default function AlavancagemFinanceiraPage() {
             {/* Modalidade */}
             <div>
               <label className="block text-sm font-bold text-muted-foreground mb-2">Modalidade</label>
-              <div className="w-full bg-background border border-border rounded-lg px-3 py-3 text-sm font-semibold text-foreground">
+              <div className="w-full bg-background border border-border rounded-lg px-3 py-3 text-xl font-bold text-foreground">
                 Sorteio
               </div>
             </div>
@@ -157,7 +157,7 @@ export default function AlavancagemFinanceiraPage() {
                 decimalScale={0}
                 min={1}
                 max={months || 220}
-                className="w-full bg-background border border-border rounded-lg px-3 py-3 text-sm font-semibold text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
+                className="w-full bg-background border border-border rounded-lg px-3 py-3 text-xl font-bold text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
               />
             </div>
           </div>
