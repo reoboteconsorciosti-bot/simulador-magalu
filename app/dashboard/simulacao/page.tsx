@@ -248,6 +248,7 @@ export default function SimulacaoPage() {
                 placeholder="Nome completo do cliente"
                 value={clientName}
                 onChange={(e) => setSharedField('clientName', e.target.value)}
+                className="h-11 text-lg font-bold"
               />
             </div>
 
@@ -266,6 +267,7 @@ export default function SimulacaoPage() {
                 fixedDecimalScale
                 allowNegative={false}
                 placeholder="R$ 0,00"
+                className="h-11 text-lg font-bold"
               />
             </div>
 
@@ -281,6 +283,7 @@ export default function SimulacaoPage() {
                 decimalScale={0}
                 placeholder="118"
                 suffix=" meses"
+                className="h-11 text-lg font-bold"
               />
             </div>
 
@@ -299,6 +302,7 @@ export default function SimulacaoPage() {
                 decimalScale={2}
                 allowNegative={false}
                 placeholder="0,00%"
+                className="h-11 text-lg font-bold"
               />
             </div>
 
@@ -315,6 +319,7 @@ export default function SimulacaoPage() {
                 decimalScale={2}
                 allowNegative={false}
                 placeholder="0,00%"
+                className="h-11 text-lg font-bold"
               />
             </div>
 
@@ -325,7 +330,7 @@ export default function SimulacaoPage() {
                 value={tipoReducao}
                 onValueChange={(value) => setSharedField('tipoReducao', value)}
               >
-                <SelectTrigger id="tipoReducao">
+                <SelectTrigger id="tipoReducao" className="h-11 text-lg font-bold">
                   <SelectValue placeholder="Selecione a modalidade" />
                 </SelectTrigger>
                 <SelectContent>
@@ -348,6 +353,7 @@ export default function SimulacaoPage() {
                 decimalScale={2}
                 allowNegative={false}
                 placeholder="0,00%"
+                className="h-11 text-lg font-bold"
               />
             </div>
             {/* Seller Info */}
