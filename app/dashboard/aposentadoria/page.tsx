@@ -156,9 +156,9 @@ export default function AposentadoriaPage() {
               />
             </div>
 
-            {/* Rendimento Aluguel */}
+            {/* Rendimento CDI */}
             <div>
-              <label className="block text-xs font-bold text-muted-foreground mb-1.5">Rendimento Aluguel (%)</label>
+              <label className="block text-xs font-bold text-muted-foreground mb-1.5">Rendimento CDI (%)</label>
               <NumericFormat
                 value={application}
                 onValueChange={(values) => setApplication(values.floatValue ?? undefined)}
