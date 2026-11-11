@@ -407,21 +407,26 @@ export default function SimulacaoPage() {
               {results ? (
                 <>
                   <div className="space-y-6">
-                    {/* Meia parcela até a contemplação */}
-                    <div className="p-6 bg-primary text-primary-foreground rounded-xl border-2 border-primary shadow-lg">
-                      <div className="text-center">
-                        <p className="text-sm opacity-90 mb-2">
+                    {/* Meia parcela até a contemplação - Mais destacado */}
+                    <div className="relative overflow-hidden p-8 rounded-xl border-3 border-lime-300/70 bg-gradient-to-br from-lime-300 via-emerald-500 to-teal-900 shadow-2xl shadow-emerald-500/40">
+                      {/* Brilho suave no centro e nos cantos */}
+                      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.28),transparent_60%)]" />
+                      <div className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent" />
+                      <div className="pointer-events-none absolute -top-12 -right-12 w-40 h-40 rounded-full bg-emerald-200/25 blur-2xl" />
+                      <div className="pointer-events-none absolute -bottom-14 -left-10 w-40 h-40 rounded-full bg-teal-300/20 blur-2xl" />
+                      <div className="relative text-center">
+                        <p className="text-lg text-emerald-50/90 mb-3 font-semibold tracking-wide">
                           {tipoReducao === 'fundo-comum' ? 'Fundo comum até a contemplação' : 'Meia parcela até a contemplação'}
                         </p>
-                        <p className="text-4xl font-extrabold">{formatCurrency(results.firstInitialPayment)}</p>
+                        <p className="text-6xl font-black text-white drop-shadow-[0_2px_8px_rgba(6,78,59,0.45)]">{formatCurrency(results.firstInitialPayment)}</p>
                       </div>
                     </div>
 
-                    {/* Pós contemplação - Mais destacado */}
-                    <div className="p-8 bg-[#ECFDF5] rounded-xl border-3 border-[#A7F3D0] shadow-xl">
+                    {/* Pós contemplação */}
+                    <div className="p-6 bg-[#ECFDF5] rounded-xl border-2 border-[#A7F3D0] shadow-lg">
                       <div className="text-center">
-                        <p className="text-lg text-[#6B7280] mb-3 font-semibold">Parcela Integral</p>
-                        <p className="text-5xl font-black text-[#059669]">{formatCurrency(results.finalPaymentAfterContemplation)}</p>
+                        <p className="text-sm text-[#6B7280] mb-2">Parcela Integral</p>
+                        <p className="text-4xl font-extrabold text-black">{formatCurrency(results.finalPaymentAfterContemplation)}</p>
                       </div>
                     </div>
                   </div>
